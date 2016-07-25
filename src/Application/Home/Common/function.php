@@ -728,6 +728,9 @@ function calculateSolubility($residue, $character1, $solubilityResults){
 		if(($specialCount / $aminoCount) > 0.6){
 			$D = isset($details['D']) ? $details['D']['count'] : 0;
 			$E = isset($details['E']) ? $details['E']['count'] : 0;
+			
+			$solubilityResult = $solubilityResults[8];
+			
 			if($D/$aminoCount<0.25 || $E/$aminoCount<0.25){
 				$solubilityResult = $solubilityResults[1];
 			}

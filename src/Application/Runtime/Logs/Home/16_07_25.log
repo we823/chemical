@@ -1872,3 +1872,334 @@ NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src
 NOTIC: [8] Undefined offset: 1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 604 行.
 NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 604 行.
 
+[ 2016-07-25T23:14:51+08:00 ] ::1 /chemical/index.php?m=home&c=index&a=result
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.000000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.001000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.001000s ]
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 780 行.
+NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -2 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+
+[ 2016-07-25T23:15:13+08:00 ] ::1 /chemical/index.php?m=home&c=index&a=result
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.000000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.001000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.001000s ]
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 780 行.
+NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -2 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -3 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -4 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -5 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+
+[ 2016-07-25T23:15:34+08:00 ] ::1 /chemical/index.php?m=home&c=index&a=result
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.001000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.001000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.001000s ]
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 780 行.
+NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -2 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -3 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+
+[ 2016-07-25T23:16:01+08:00 ] ::1 /chemical/index.php?m=home&c=index&a=result
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.001000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.001000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.001000s ]
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 780 行.
+NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -2 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -3 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -4 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -5 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -6 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -7 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -8 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -9 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -10 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -11 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -12 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+
+[ 2016-07-25T23:16:18+08:00 ] ::1 /chemical/index.php?m=home&c=index&a=result
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.001000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.000000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000000s ]
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 780 行.
+NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -2 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -3 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -4 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -5 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -6 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -7 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -8 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -9 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -10 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -11 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+
+[ 2016-07-25T23:16:51+08:00 ] ::1 /chemical/index.php?m=home&c=index&a=result
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.001000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.001000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.001000s ]
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 780 行.
+NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -2 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+
+[ 2016-07-25T23:17:19+08:00 ] ::1 /chemical/index.php?m=home&c=index&a=result
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.001000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.002000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.002000s ]
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 14 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 15 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 16 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 17 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 18 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 19 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 20 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 21 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 22 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 23 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 24 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 25 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 26 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 27 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 28 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined offset: 29 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 139 行.
+NOTIC: [8] Undefined index: hydrophilyCount D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 780 行.
+NOTIC: [8] Undefined offset: 0 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -1 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+NOTIC: [8] Undefined offset: -2 D:\php-develop\projects\chemical\src\Application\Home\Common\function.php 第 605 行.
+
