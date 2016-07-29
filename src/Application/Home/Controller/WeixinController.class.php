@@ -5,7 +5,7 @@ use Think\Controller;
 define('TOKEN', 'chemicalduotaian');
 define('APP_ID', 'wxa21efa542ac0a1ea');
 define('APP_SECRET', '71b88000b0b1a191d8a4150b96a171f0');
-define('WEB_HOST','http://www.we823.com/chemical');
+define('WEB_HOST', 'http://www.we823.com/chemical');
 
 class WeixinController extends Controller{
 	private $appid;
@@ -118,6 +118,7 @@ class WeixinController extends Controller{
 	
 	private function receiveText($object)
     {
+    	$web_root = WEB_HOST;
         $funcFlag = 0;
         $contentStr = $object->Content;
 		if('?'==$contentStr || '？'==$contentStr){
@@ -298,7 +299,7 @@ class WeixinController extends Controller{
 			              .'pH=7时的净电荷：'.$result['pi7']."\n"
 			              .'亲水性：'.$result['hydrophilyResult']."\n"
 			              .'溶水性：'.$result['solubilityResult']."\n( 备注：由于溶解性不仅与氨基酸的序列有关，也和产品所带的反离子有关，若溶解性遇到问题，可咨询我们的技术人员。)\n"
-			              .'<a href="'.WEB_HOST."/index.php?cal=1&nterm='.$nterm.'&cterm='.$cterm.'&amino='.$amino.'">查看详情</a>';
+			              .'<a href="'.WEB_HOST.'"/index.php?cal=1&nterm='.$nterm.'&cterm='.$cterm.'&amino='.$amino.'">查看详情</a>';
 
 		}
 		return $contentStr;
