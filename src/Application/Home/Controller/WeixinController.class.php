@@ -5,6 +5,7 @@ use Think\Controller;
 define('TOKEN', 'chemicalduotaian');
 define('APP_ID', 'wxa21efa542ac0a1ea');
 define('APP_SECRET', '71b88000b0b1a191d8a4150b96a171f0');
+define('WEB_HOST','http://www.we823.com/chemical');
 
 class WeixinController extends Controller{
 	private $appid;
@@ -59,6 +60,7 @@ class WeixinController extends Controller{
         }else {
         	header('content-type: text/html;charset=utf-8');
         	echo '欢迎';
+            
         	exit;
         }
     }
@@ -97,7 +99,7 @@ class WeixinController extends Controller{
 				     array(
 					    'name'=>urlencode('打开网页'),
 					    'type'=>'view',
-					    'url'=>'http://www.we823.com/chemical/index.php'
+					    'url'=>WEB_HOST.'/index.php'
 					 )
 				  )
 			   )
@@ -122,7 +124,8 @@ class WeixinController extends Controller{
 			$contentStr = "请输入氨基酸序列： \nNTerm-氨基酸序列-CTerm\n"
 			              .'如H-AC-OH'."\n"
 			              .'若只输入序列，则默认NTerm=H-，CTerm=-OH'."\n"
-						  .'若在序列后加上逗号(,)，则输入全部转化为大写字母';
+						  .'若在序列后加上逗号(,)，则输入全部转化为大写字母'."\n"
+						  .'<a href="'.WEB_HOST.'/index.php/home/index/about">软件说明</a>';
 		}else{
 			$contentStr = $this->aminoCalculate($contentStr);
 		}
@@ -223,26 +226,58 @@ class WeixinController extends Controller{
     }
 
     private function aminoCalculate($keyword){
-    	$tools = split(',', $keyword);
+    	
+		if(is_null($this->chemicalData)) $this->chemicalData = init_data();
+		
+		$tools = split(',', $keyword);
 		
 		if(count($tools)>1){
 			$keyword = strtoupper($tools[0]);
 		}
 		
-    	$keys = split('-', trim($keyword));
-		
 		$contentStr = '';
-		$count = count($keys);
-		$nterm = 'H-';
-		$cterm = '-OH';
+		$nterm = '';
+		$cterm = '';
 		$amino = $keyword;
-		if($count==3){
-			$nterm = $keys[0].'-';
-		    $amino = $keys[1];
-		    $cterm = '-'.$keys[2];
+		
+		$chemicalData = $this->chemicalData;
+		$ntermData = $chemicalData['ntermData'];
+		$ctermData = $chemicalData['ctermData'];
+		
+		// 根据nterm和cterm的参数，获取相关信息，分解出序列
+		$nterm_values = array_values($ntermData);
+		foreach($nterm_values as $nterm_value){
+			$A = $nterm_value['A'];
+			if(strpos($keyword, $A)===0){
+				$nterm = $A;
+				break;
+			}
+		}
+		
+		$cterm_values = array_values($ctermData);
+		foreach($cterm_values as $cterm_value){
+			$A = $cterm_value['A'];
+			$pos = strrpos($keyword, $cterm_value['A']);
+			$len = strlen($keyword)-strlen($cterm_value['A']);
+
+			if($pos === $len){
+				$cterm = $A;
+				break;
+			}
 		}
 	
-		if(is_null($this->chemicalData)) $this->chemicalData = initData();
+		if(strlen($nterm)>0){
+			$amino = substr($keyword, strlen($nterm));
+		}else{
+			$nterm = 'H-';
+		}
+		
+		if(strlen($cterm)>0){
+			$amino = substr($amino, 0, strlen($amino)-strlen($cterm));
+		}else{
+			$cterm = '-OH';
+		}
+		
 		$needCheckData = array(
 		   'amino'=>$amino,
 		   'cterm'=>$cterm,
@@ -262,11 +297,10 @@ class WeixinController extends Controller{
 			              .'等电点（PI）：'.$result['isoelectricPoint']."\n"
 			              .'pH=7时的净电荷：'.$result['pi7']."\n"
 			              .'亲水性：'.$result['hydrophilyResult']."\n"
-			              .'溶水性：'.$result['solubilityResult']."( 备注：由于溶解性不仅与氨基酸的序列有关，也和产品所带的反离子有关，若溶解性遇到问题，可咨询我们的技术人员。)\n"
-			              .'<a href="http://www.we823.com/chemical/index.php?cal=1&nterm='.$nterm.'&cterm='.$cterm.'&amino='.$amino.'">查看详情</a>';
+			              .'溶水性：'.$result['solubilityResult']."\n( 备注：由于溶解性不仅与氨基酸的序列有关，也和产品所带的反离子有关，若溶解性遇到问题，可咨询我们的技术人员。)\n"
+			              .'<a href="'.WEB_HOST."/index.php?cal=1&nterm='.$nterm.'&cterm='.$cterm.'&amino='.$amino.'">查看详情</a>';
 
 		}
-		
 		return $contentStr;
     }
 

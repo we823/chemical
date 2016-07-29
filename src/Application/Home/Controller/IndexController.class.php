@@ -8,15 +8,17 @@ class IndexController extends Controller {
 	private $chemicalData = null;
 	
     public function index(){
-		if(is_null($this->chemicalData)) $this->chemicalData = initData();
-		$this->assign('cterms', $this->chemicalData['ctermData']);
-		$this->assign('nterms', $this->chemicalData['ntermData']);
+		if(is_null($this->chemicalData)) $this->chemicalData = init_data();
+
+		$this->assign('cterms', array_values($this->chemicalData['ctermData']));
+		$this->assign('nterms', array_values($this->chemicalData['ntermData']));
 		
-		$amino = request('amino');
-		$cterm = request('CTerm');
-		$nterm = request('NTerm');
+		$amino = I('amino');
+		$cterm = I('CTerm');
+		$nterm = I('NTerm');
 		
-		$cal = request('cal', 0);
+		// $cal=1 获取参数值，并赋值，便于接收外部地址链接
+		$cal = I('cal', 0);
 		if($cal==1){
 			$this->assign('amino', $amino);
 			$this->assign('cterm', $cterm);
@@ -33,9 +35,9 @@ class IndexController extends Controller {
 		
 		header('Access-Control-Allow-Origin:'.$_SERVER['HTTP_ORIGIN']);
 		header('Access-Control-Allow-Credentials:true');
-		$amino = request('amino');
-		$cterm = request('CTerm', 0);
-		$nterm = request('NTerm', 0);
+		$amino = I('amino');
+		$cterm = I('CTerm');
+		$nterm = I('NTerm');
 		
 		$needCheckData = array(
 		   'amino'=>$amino,
@@ -43,12 +45,14 @@ class IndexController extends Controller {
 		   'nterm'=>$nterm
 		);
 	
-		if(is_null($this->chemicalData)) $this->chemicalData = initData();
+		/*if(is_null($this->chemicalData))*/ $this->chemicalData = init_data();
 		
 		$result = calculateResult($this->chemicalData, $needCheckData);
 
 		$this->ajaxReturn($result);
 	}
 	
-	
+	function about(){
+		$this->display();
+	}
 }

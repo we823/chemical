@@ -1,158 +1,154 @@
 <?php
-function request($name, $default='', $method='request'){
-	$method = strtolower($method);
-	switch($method){
-		case 'get':
-			return isset($_GET[$name]) ? $_GET[$name] : $default;
-			break;
-		case 'post':
-			return isset($_POST[$name]) ? $_POST[$name] : $default;
-			break;
-		default:
-			return isset($_REQUEST[$name]) ? $_REQUEST[$name] : $default;
-	}
-}
 
-function showDebug($line, $param, $debug=true){
+function show_debug($line, $param, $debug=true){
 	if($debug){
 		echo "<br>$line:";
 		var_dump($param);
 		echo "<br>";
 	}
 }
-
-function getConfig(){
+/**
+ * 返回需要显示的结果配置
+ */
+function get_result_config(){
 	return array(
-		'solubilityResult'=>array(
-		   '0'=>'可溶于水，但放置后成凝胶',
-		   '1'=>'分子间易聚集，可能需要有机试剂助溶',
-		   '2'=>'水溶',
-		   '3'=>'水可溶',
-		   '4'=>'需要碱性缓冲液助溶',
-		   '5'=>'需要甲酸或DMSO助溶',
-		   '6'=>'需要碱性缓冲液和有机试剂助溶',
-		   '7'=>'需要甲酸或DMSO助溶',
-		   '8'=>'分子间易聚集，需要碱性缓冲液助溶'
+		'solubility_result'=>array(
+		   0=>'可溶于水，但放置后成凝胶',
+		   1=>'分子间易聚集，可能需要有机试剂助溶',
+		   2=>'水溶',
+		   3=>'水可溶',
+		   4=>'需要碱性缓冲液助溶',
+		   5=>'需要甲酸或DMSO助溶',
+		   6=>'需要碱性缓冲液和有机试剂助溶',
+		   7=>'需要甲酸或DMSO助溶',
+		   8=>'分子间易聚集，需要碱性缓冲液助溶'
 		),
-		'hydrophilyResult'=>array(
-		   '0'=>'非常亲水',
-		   '1'=>'亲水',
-		   '2'=>'疏水',
-		   '3'=>'非常疏水'
+		'hydrophily_result'=>array(
+		   0=>'非常亲水',
+		   1=>'亲水',
+		   2=>'疏水',
+		   3=>'非常疏水'
 		)
 	);
 }
-function initData() {
+function init_data() {
 	vendor('PHPExcel.PHPExcel.IOFactory');
-	$inputFileType = 'Excel5';
-	$inputFileName = './data/data.xls';
+	$input_filetype = 'Excel5';
+	$input_filename = './data/data.xls';
 
-	$sheetStandard = 'standard';
-	$sheetPK = 'pk';
-	$sheetConst = 'const';
+	$standard_sheetname = 'standard';
+	$pk_sheetname = 'pk';
+	$amino_const_sheetname = 'const';
 
-	$objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+	$obj_reader = \PHPExcel_IOFactory::createReader($input_filetype);
 
-	$objPHPExcel = $objReader -> load($inputFileName);
+	$obj_PHPExcel = $obj_reader -> load($input_filename);
 
-	$sheetData = $objPHPExcel -> getSheetByName($sheetStandard) -> toArray(null, true, true, true);
-	$sheetPkData = $objPHPExcel -> getSheetByName($sheetPK) -> toArray(null, true, true, true);
-	$sheetConstData = $objPHPExcel -> getSheetByName($sheetConst) -> toArray(null, true, true, true);
-
-	$count = count($sheetData);
-
-    //单字母数据
-	$standardData = array();
-	//三字母数据
-	$threeData = array();
+	$standard_sheetdata = $obj_PHPExcel -> getSheetByName($standard_sheetname) -> toArray(null, true, true, true);
+	$pk_sheetdata = $obj_PHPExcel -> getSheetByName($pk_sheetname) -> toArray(null, true, true, true);
+	$amino_const_sheetdata = $obj_PHPExcel -> getSheetByName($amino_const_sheetname) -> toArray(null, true, true, true);
+    
+    //字母数据
+	$standard_data = array();
 	//元素常量
-	$constData = array();
+	$amino_const_data = array();
+	// 氨基酸残基元素最长个数
+	$amino_max_length = 1;
+	// 计算pk相关的值
+	$pk_data = array();
 	// nterm相关元素
-	$ntermData = array();
+	$nterm_data = array();
 	// cterm相关元素
-	$ctermData = array();
+	$cterm_data = array();
 	
-    //混合模式
-	$allPattern = '';
-	//三字母模式
-	$threePattern = '';
-	//单字母模式
-	$singlePattern = '';
+    //需要校验的模式
+	$standard_pattern = '';
 	
 	// 获取元素常量
-	if (($constCount = count($sheetConstData)) > 0) {
-		$values = array_values($sheetConstData);
-		for ($index = 1; $index < $constCount; $index++) {
-			$constData[$values[$index]['A']] = $values[$index];
+	if (($const_count = count($amino_const_sheetdata)) > 0) {
+		$const_values = array_values($amino_const_sheetdata);
+		for ($index = 1; $index < $const_count; $index++) {
+			$amino_const_data[$const_values[$index]['A']] = $const_values[$index];
 		}
 	}
-
+    
+	$standard_count = count($standard_sheetdata);
 	// 获取氨基酸数据及匹配模式
-	if ($count > 0) {
-		$values = array_values($sheetData);
-		for ($index = 1; $index < $count; $index++) {
-			$value = $values[$index];
-
-			$B = $value['B'];
-
-			$standardData[$value['A']] = $value;
-			$threeData[$B] = $value;
-            
-			$R = $value['R'];
+	if ($standard_count > 0) {
+		// 所有元素
+		$standard_values = array_values($standard_sheetdata);
+		$pattern_values = array();
+		
+		for($index=1; $index < $standard_count; $index++){
+			$value = $standard_values[$index];
 			
-			// 参与序列校验
-			if ($R == 1) {
-				$threePattern = $threePattern . '(' . $B . ')';
-
-				$A = $value['A'];
-				if (strlen($A) > 1) {
-					$A = "($A)";
-				}
-
-				$singlePattern = $singlePattern . $A;
-
-				if ($index < $count - 1) {
-					$threePattern = $threePattern . '|';
-					$singlePattern = $singlePattern . '|';
-				}
+			$A = $value['A'];
+			$B = $value['B'];
+			
+			// 获取最长氨基酸字符长度
+			$a_length = strlen($A);
+			$b_length = strlen($B);
+			$a_length = ($a_length>$b_length) ? $a_length : $b_length;
+			$amino_max_length = ($a_length > $amino_max_length) ? $a_length : $amino_max_length;
+            
+			$standard_data[$A] = $value;
+			$standard_data[$B] = $value;
+			
+			$R = $value['R'];
+			if($R==1){
+				array_push($pattern_values, $value);
 			}
-
-            if($R==2){
-				array_push($ntermData, $value['A']);
+			
+			if($R==2){
+				array_push($nterm_data, $value);
 			}
 			
             if($R==3){
-            	array_push($ctermData, $value['A']);
+            	array_push($cterm_data, $value);
             }
 		}
+        
+		// 获取正则表达式
+		/*
+		for ($index = 0, $pattern_count = count($pattern_values); $index < $pattern_count; $index++) {
+			$value = $pattern_values[$index];
+			
+			// 特殊符号处理
+			$A = str_special($A);
+			$B = str_special($B);
+			
+			$B = '(' . $B . '\-?)';
+
+			$A = "($A\-?)";
+
+			$standard_pattern = $standard_pattern .$A .'|'.$B;
+			if ($index < $pattern_count-1) {
+				$standard_pattern = $standard_pattern . '|';
+			}
+		}   
+		 */ 
 	}
-
-	$allPattern = "[$singlePattern|$threePattern]+";
-	$singlePattern = "[$singlePattern]+";
-	$threePattern = "[($threePattern)]+";
-
-    $pkData = array();
-	
-	if(count($sheetPkData)>0){
-		$pkValues = array_values($sheetPkData);
-		for($index=1; $index<$count; $index++){
-			$pkData[$sheetPkData[$index]['A']] = $sheetPkData[$index];
+    
+	// 计算pk相关的data值
+	$pk_count=count($pk_sheetdata);
+	if($pk_count > 0){
+		$pk_values = array_values($pk_sheetdata);
+		
+		for($index=1; $index<$pk_count; $index++){
+			$pk_data[$pk_sheetdata[$index]['A']] = $pk_sheetdata[$index];
 		}
 	}
 	
-	$chemicalData = array(
-	    'single' => $singlePattern, 
-	    'three' => $threePattern, 
-	    'all' => $allPattern, 
-	    'standardData' => $standardData, 
-	    'threeData' => $threeData, 
-	    'constData' => $constData, 
-	    'pkData' => $pkData,
-	    'ctermData' => $ctermData,
-	    'ntermData' => $ntermData
+	$chemicalInitData = array(
+	    'aminoMaxLength'=>$amino_max_length+1,
+	    'standardPattern' => $standard_pattern, 
+	    'standardData' => $standard_data, 
+	    'aminoConstData' => $amino_const_data, 
+	    'pkData' => $pk_data,
+	    'ctermData' => $cterm_data,
+	    'ntermData' => $nterm_data
      );
-	 
-	 return $chemicalData;
+	 return $chemicalInitData;
 }
 
 function aminoCheck($pattern, $checkData){
@@ -182,16 +178,115 @@ function aminoCheck($pattern, $checkData){
 	}
 	return $valid;
 }
+/**
+ * 将序列转换为数组
+ */
+function amino_to_array($chemical_init_data, $check_amino){
+	$standard_data = $chemical_init_data['standardData'];
 
-function calculateResult($config, $needCheckData){
+	$amino_max_length = $chemical_init_data['aminoMaxLength'];
+	
+	$result = array();
+	$amino_length = strlen($check_amino);
+	$index = 0;
+    
+	if(is_null($standard_data) || empty($standard_data)){
+		return array(
+		  'hasError'=>true,
+		  'message'=>'可校验的标准数据为空，无法校验'
+		);
+	}
+	
+	while($index < $amino_length){
+
+		$current_amino_length = strlen($check_amino);
+		$sub_length = ($amino_max_length < $current_amino_length) ? $amino_max_length : $current_amino_length;
+		$sub_amino_result = get_sub_amino($standard_data, $amino_max_length, $check_amino);
+		
+		if(is_null($sub_amino_result)){
+			return array(
+			   'hasError'=>true,
+			   'message'=>'校验错误,未获取正确的子序列结果'
+			);
+		}
+		
+		if($sub_amino_result['hasError']){
+			return $sub_amino_result;
+		}
+		
+		$sub_amino = $sub_amino_result['sub_amino'];
+
+		if(array_key_exists($sub_amino, $standard_data)){
+		     array_push($result, $sub_amino);
+			 $sub_amino_length = $sub_amino_result['real_length'];
+			 $index = $index + $sub_amino_length;
+			 $check_amino = substr($check_amino, $sub_amino_length);
+		}
+	}
+	$valid_result = array(
+	   'hasError'=>false,
+	   'message'=>'校验正确',
+	   'aminoDetail'=>$result
+	);
+
+	return $valid_result;
+}
+
+/**
+ * 获取正确的子序列
+ */
+function get_sub_amino($standard_data, $amino_max_length, $check_amino){
+	$length = strlen($check_amino);
+	$sub_length = ($amino_max_length > $length) ? $length : $amino_max_length;
+    $real_length = $sub_length;
+	
+	$tmp_check_amino = $check_amino;
+	
+	if(strpos($tmp_check_amino, '-')===0 && strlen($tmp_check_amino)>0){
+		if(array_key_exists($tmp_check_amino, $standard_data)){
+			return array(
+			   'sub_amino'=>$tmp_check_amino,
+			   'real_length'=>$real_length,
+			   'hasError'=>false,
+			   'message'=>'正确匹配'
+			);
+		}
+		$tmp_check_amino = substr($tmp_check_amino, 1);
+		$sub_length--;
+	}
+	
+	$sub_amino = substr($tmp_check_amino, 0, $sub_length);
+	
+	if(array_key_exists($sub_amino, $standard_data)){
+		return array(
+		   'sub_amino'=>$sub_amino,
+		   'real_length'=>$real_length,
+		   'hasError'=>false,
+		   'message'=>'正确匹配'
+		);
+	}else{
+		if($amino_max_length<=0){
+			return array(
+			   'hasError'=>true,
+			   'message'=>"字符：$check_amino 无法完成匹配"
+			);
+		}
+		$amino_max_length = $amino_max_length - 1;
+		return get_sub_amino($standard_data, $amino_max_length, $check_amino);
+	}
+}
+
+function calculateResult($chemicalInitData, $needCheckData){
 	
 	$data = $needCheckData['amino'];
 	$cterm = $needCheckData['cterm'];
 	$nterm = $needCheckData['nterm'];
 	
-	$singleValid = aminoCheck($config['single'], $data);
-	$allValid = aminoCheck($config['all'], $data);
-	
+	$valid_result = amino_to_array($chemicalInitData, $data);
+    if($valid_result['hasError']){
+    	return $valid_result;
+    }
+
 	$aminoLength = strlen($data);
 	if($aminoLength==0){
 		return array(
@@ -199,32 +294,23 @@ function calculateResult($config, $needCheckData){
 		   'message'=>'序列为空，无法计算'
 		);
 	}
-	
-	if($allValid==0){
-		return array(
-		   'hasError'=>true,
-		   'message'=>'序列不正确'
-		);
-	}
-	
+
+	$amino_result_data = $valid_result['aminoDetail'];
 	//pk相关固定值
-	$pkData = $config['pkData'];
+	$pk_data = $chemicalInitData['pkData'];
 	//标准的单字母序列信息
-	$standardData = $config['standardData'];
-	$threeData = $config['threeData'];
+	$standard_data = $chemicalInitData['standardData'];
 	//元素分子量固定值
-	$constData = $config['constData'];
+	$amino_const_data = $chemicalInitData['aminoConstData'];
 	
 	//cterm 配置
-	$ctermData = $config['ctermData'];
+	$cterm_data = $chemicalInitData['ctermData'];
 	//nterm配置
-	$ntermData = $config['ntermData'];
+	$nterm_data = $chemicalInitData['ntermData'];
 	
-	$chemicalConfig = getConfig();
-	//溶解性相关的文字信息
-	$solubilityResults = $chemicalConfig['solubilityResult'];
-	
-	
+	// 亲水性及溶解性文字结果配置
+	$result_config = get_result_config();
+
 	$result = array();
     $character1 = ''; //单字母
 	$character3 = ''; //三字母
@@ -251,142 +337,64 @@ function calculateResult($config, $needCheckData){
 	   'p'=>0
 	);
 	
-	if(isset($standardData[$cterm])){
-		fillBaseInfo( $residue, $standardData[$cterm]);
+	if(isset($standard_data[$cterm])){
+		fillBaseInfo( $residue, $standard_data[$cterm]);
 	}
 	
-	if(isset($standardData[$nterm])){
-		fillBaseInfo( $residue, $standardData[$nterm]);
+	if(isset($standard_data[$nterm])){
+		fillBaseInfo( $residue, $standard_data[$nterm]);
 	}
-	
 	
 	$hasError = false;
 	$message = '';
+    
+	$preAmino = '';
 	
-	if($singleValid == 1){ //只包含单字母
-    	for($index=0; $index < $aminoLength; $index++){
-    		
-			$standardD = null;
-			// 按照1字母、2字母、3字母长度获取
-			for($i=1; $i<=5; $i++){
-				$c = substr($data, $index, $i);
-				if(isset($standardData[$c])){
-					$standardD = $standardData[$c]; //获取到残基信息
-					$index = ($i==1) ? $index : ($index+$i);
-					break;
-				}
-			}
-			
-			if(is_null($standardD)){
-				continue;
-			}
-			
-			if(isset($residue['detail'][$c])){
-				$residue['detail'][$c]['count'] = $residue['detail'][$c]['count'] + 1;
-			}else{
-				$residue['detail'][$c] = array(
-				    'count'=>1,
-				    'name1'=>$c,
-				    'name3'=>$standardD['B'],
-				    'mw'=>$standardD['E']
-				);
-			}
-			
-			$residue['count']++;
-			fillBaseInfo( $residue, $standardD);
-			
-			$character3 = $character3.$standardD['B'];
+	for($index=0, $result_data_count = count($amino_result_data); $index<$result_data_count; $index++){
+		$amino = $amino_result_data[$index];
+		$standard = $standard_data[$amino];
 		
+		$singleAmino = $standard['A'];
+		$otherAmino = $standard['B'];
 		
-			if($index < $aminoLength-1){
-				if(!empty($character1) && strlen($c)>1){
-					$c = "-$c-";
-				}
-				$character1 = $character1.$c;
-				$character3 = $character3.'-';
-			}else{
-				if(!empty($character1) && strlen($c)>1){
-					$c = "-$c";
-				}
-				$character1 = $character1.$c;
-			}
+		if(isset($residue['detail'][$singleAmino])){
+			$residue['detail'][$singleAmino]['count'] = $residue['detail'][$singleAmino]['count'] + 1;
+
+		}else{
+			$residue['detail'][$singleAmino] = array(
+			    'count'=>1,
+			    'name1'=>$singleAmino,
+			    'name3'=>$otherAmino,
+			    'mw'=>$standard['E']
+			);
 		}
-	}else{ //包含三字母
-    	$index = 0;
-		while($index < $aminoLength){
-			$c = '';
-			$tmpData = null;
-			
-			if($index + 2 < $aminoLength ){
+		
+		$residue['count']++;
+		fillBaseInfo( $residue, $standard);
+		
+		if(strlen($character1)==0){
+			$character1 = $singleAmino;
+			$preAmino = $singleAmino;
+		}else{
 
-				$c = substr($data, $index, 3); //按三字母获取
-				
-				if(isset($threeData[$c])){
-					$tmpData = $threeData[$c];
-					$c = $tmpData['A'];
-					$index += 3;
-				}
-				
-				if(is_null($tmpData)){ // single
-					$c = substr($data, $index, 1); //按单字母获取
-					if(isset($standardData[$c])){
-						$tmpData = $standardData[$c];
-					    $index += 1;
-					}else{
-						$c = substr($data, $index, 2); //按2个字母长度计算
-				        
-					    if(isset($standardData[$c])){
-						   $tmpData = $standardData[$c]; //获取到残基信息
-						   $index = $index + 2;
-					    } 
-					}
-				}
-			
+			if(strlen($singleAmino)>1){
+			   $singleAmino = '-'.$singleAmino;
 			}else{
-				// 'first single....<br>';
-				$c = substr($data, $index, 1); //按单字母获取
-				if(isset($standardData[$c])){
-					$tmpData = $standardData[$c];
-				    $index += 1;
-				}else{
-					$c = substr($data, $index, 2); //按2个字母长度计算
-			        $index += 2;
-			
-				    if(isset($standardData[$c])){
-					   $tmpData = $standardData[$c]; //获取到残基信息
-				    } 
+				if(strlen($preAmino)>1){
+					$singleAmino = '-'.$singleAmino;
 				}
 			}
-			
-			if(!is_null($tmpData)){
-				if(isset($residue['detail'][$c])){
-					$residue['detail'][$c]['count'] = $residue['detail'][$c]['count'] + 1;
-				}else{
-					$residue['detail'][$c] = array(
-					    'count'=>1,
-					    'name1'=>$c,
-					    'name3'=>$tmpData['B'],
-					    'mw'=>$tmpData['E']
-					);
-				}
-				
-				$residue['count']++;
-				fillBaseInfo( $residue, $tmpData);
-				$character3 = $character3.$tmpData['B'];
+			$character1 = $character1.$singleAmino;
+			$preAmino = str_replace('-', '', $singleAmino);
+		}
+		
+		if(strlen($character3)==0){
+			$character3 = $otherAmino;
+		}else{
+			if(strlen($otherAmino)>1){
+				$otherAmino = '-'.$otherAmino;
 			}
-
-			if($index < $aminoLength-1){
-				if(!empty($character1) && strlen($c)>1){
-					$c = "-$c-";
-				}
-				$character1 = $character1.$c;
-				$character3 = $character3.'-';
-			}else{
-				if(!empty($character1) && strlen($c)>1){
-					$c = "-$c";
-				}
-				$character1 = $character1.$c;
-			}
+			$character3 = $character3.$otherAmino;
 		}
 	}
 	
@@ -395,12 +403,11 @@ function calculateResult($config, $needCheckData){
 	$residue['o']+=1;
 	$residue['molecularWeight']+=18;
 	
-	$mw = calculateWeight($constData, 'MW', $residue);
-	$em = calculateWeight($constData, 'EM', $residue);
+	$mw = calculateWeight($amino_const_data, 'B', $residue);
+	$em = calculateWeight($amino_const_data, 'C', $residue);
 	
 	// 计算分子式
 	$molecularFormula = getMolecularFormula($residue);
-	
 	
 	$character1 = $nterm.$character1.$cterm;
 	$character3 = $nterm.$character3.$cterm;
@@ -411,7 +418,7 @@ function calculateResult($config, $needCheckData){
 	$result['em'] = sprintf("%.4f",$em);
 	
 	// pi相关计算
-	$PI = calculatePI($residue, $cterm, $nterm, $pkData);
+	$PI = calculatePI($residue, $cterm, $nterm, $pk_data);
 	
 	$maxY = 7;
 	if(!is_null($PI)){
@@ -430,27 +437,29 @@ function calculateResult($config, $needCheckData){
 	$result['residue'] = $residue;
 	$result['molecularFomula'] = $molecularFormula;
 	
-	$otherAmino = getOtherAmino($cterm, $nterm, $standardData);
+	$otherAmino = getOtherAmino($cterm, $nterm, $standard_data);
 	if(!is_null($otherAmino)){
 		$result['otherAmino'] = $otherAmino;
 	}
 	
 	// 亲水性
-	$hydrophily = $residue['hydrophilyCount']/$residue['count'];
-	$hydrophilyResults = $chemicalConfig['hydrophilyResult'];
+	$hydrophily = round($residue['hydrophilyCount']/$residue['count'],2);
+	$hydrophilyResults = $result_config['hydrophily_result'];
 	
-	$hydrophilyResult = $hydrophilyResults['3'];
+	$hydrophilyResult = $hydrophilyResults[3];
 	if($hydrophily>1){
-		$hydrophilyResult = $hydrophilyResults['0'];
+		$hydrophilyResult = $hydrophilyResults[0];
 	}else if($hydrophily>0 && $hydrophily<=1){
-		$hydrophilyResult = $hydrophilyResults['1'];
+		$hydrophilyResult = $hydrophilyResults[1];
 	}else if($hydrophily>-1 && $hydrophily<=0){
-		$hydrophilyResult = $hydrophilyResults['2'];
+		$hydrophilyResult = $hydrophilyResults[2];
 	}
 	$result['hydrophily'] = $hydrophily;
 	$result['hydrophilyResult'] = $hydrophilyResult;
-
-    $solubilityResult = calculateSolubility($residue, $character1, $solubilityResults);
+    
+	//溶解性相关的文字信息
+	$solubility_results = $result_config['solubility_result'];
+    $solubilityResult = calculateSolubility($residue, $character1, $solubility_results);
 	$result['solubilityResult'] = $solubilityResult;
 	return $result;
 }
@@ -460,19 +469,19 @@ function calculateResult($config, $needCheckData){
  */
 function calculateWeight($constData, $type, $residue){
 
-	$const = $constData[$type];
+	$const = $constData;
 	if(is_null($const)){
 		return 0;
 	}
 	
 	$result = 0;
-	$result += $const['B'] * $residue['c'];
-	$result += $const['C'] * $residue['h'];
-	$result += $const['D'] * $residue['o'];
-	$result += $const['E'] * $residue['n'];
-	$result += $const['F'] * $residue['s'];
-	$result += $const['G'] * $residue['p'];
 
+	$result += $const['C'][$type] * $residue['c'];
+	$result += $const['H'][$type] * $residue['h'];
+	$result += $const['O'][$type] * $residue['o'];
+	$result += $const['N'][$type] * $residue['n'];
+	$result += $const['S'][$type] * $residue['s'];
+	$result += $const['P'][$type] * $residue['p'];
 
 	return $result;
 }
@@ -829,4 +838,15 @@ function getOtherAmino($cterm, $nterm, $standData){
 	
 	return $otherAmino;
 	
+}
+
+/**
+ * 将subject中用于校验的特殊字符转换，如()-
+ * @param subject mixed
+ */
+function str_special($subject){
+	$subject = str_replace('-','\-',$subject);
+	$subject = str_replace('(', '\(', $subject);
+	$subject = str_replace(')', '\)', $subject);
+	return $subject;
 }
