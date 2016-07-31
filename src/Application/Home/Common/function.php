@@ -14,14 +14,18 @@ function get_result_config(){
 	return array(
 		'solubility_result'=>array(
 		   0=>'可溶于水，但放置后成凝胶',
-		   1=>'分子间易聚集，可能需要有机试剂助溶',
-		   2=>'水溶',
-		   3=>'水可溶',
-		   4=>'需要碱性缓冲液助溶',
-		   5=>'需要甲酸或DMSO助溶',
-		   6=>'需要碱性缓冲液和有机试剂助溶',
-		   7=>'需要甲酸或DMSO助溶',
-		   8=>'分子间易聚集，需要碱性缓冲液助溶'
+		   1=>'分子间易聚集，需要酸性缓冲液助溶',
+		   2=>'分子间易聚集，需要碱性缓冲液助溶',
+		   3=>'分子间易聚集，可能需要有机试剂助溶',
+		   4=>'水溶',
+		   5=>'水溶，但放置后可能会成多聚体',
+		   6=>'水可溶，但放置后可能会成多聚体',
+		   7=>'水可溶',
+		   8=>'需要碱性缓冲液助溶',
+		   9=>'需要甲酸或DMSO助溶',
+		   10=>'需要碱性缓冲液和有机试剂助溶',
+		   11=>'需要甲酸或DMSO助溶',
+		   12=>'难溶'
 		),
 		'hydrophily_result'=>array(
 		   0=>'非常亲水',
@@ -459,8 +463,10 @@ function calculateResult($chemicalInitData, $needCheckData){
     
 	//溶解性相关的文字信息
 	$solubility_results = $result_config['solubility_result'];
-    $solubilityResult = calculateSolubility($residue, $character1, $solubility_results);
+	$result_index = calculateSolubility($residue, $character1, $standard_data, $solubility_results);
+    $solubilityResult = $solubility_results[$result_index];
 	$result['solubilityResult'] = $solubilityResult;
+	$result['solubilityIndex'] = $result_index;
 	return $result;
 }
 
@@ -700,14 +706,14 @@ function getPK($amino, $pkData){
 /**
  * 计算溶水性
  */
-function calculateSolubility($residue, $character1, $solubilityResults){
+function calculateSolubility($residue, $character1, $standardData, $solubilityResults){
 	
-	$aminoCount = $residue['count'];
+	$y = $aminoCount = $residue['count'];
 	$acidCount = $residue['acidCount'];
 	$baseCount = $residue['baseCount'];
-	$hydrophily = $residue['hydrophilyCount'] / $aminoCount;
+	$x = $hydrophily = $residue['hydrophilyCount'] / $aminoCount;
 	
-	$solubilityResult = '';
+	$result_index = -1;
 	
     // 特殊序列检查
 	$specials = ['RADA','TSTS','IKIE','QQQ','NNNNN','DSSDSS'];
@@ -718,13 +724,12 @@ function calculateSolubility($residue, $character1, $solubilityResults){
 	    $specialValid = preg_match_all("/$pattern/", $character1, $speicalItems);
 
 		if($specialValid>=2){
-		    $solubilityResult = $solubilityResults[0];
-		    return $solubilityResult;
+		    return 0;
 	     }	
 	}
 
-	// 氨基酸总个数大于10
-	if($aminoCount>10){
+	// 氨基酸总个数大于等于10
+	if($y >= 10){
 		$specialAminos = ['D','E','N','Q','R','S','T','Y'];
 		$details = $residue['detail'];
 		$specialCount = 0;
@@ -734,48 +739,113 @@ function calculateSolubility($residue, $character1, $solubilityResults){
 			}
 		}
 
-		if(($specialCount / $aminoCount) > 0.6){
-			$D = isset($details['D']) ? $details['D']['count'] : 0;
-			$E = isset($details['E']) ? $details['E']['count'] : 0;
-			
-			$solubilityResult = $solubilityResults[8];
-			
-			if($D/$aminoCount<0.25 || $E/$aminoCount<0.25){
-				$solubilityResult = $solubilityResults[1];
-			}
-			
-			if($D/$aminoCount>=0.25 || $E/$aminoCount>=0.25){
-				$solubilityResult = $solubilityResults[8];
-			}
-			
-			return $solubilityResult;
-		}
+		if(($specialCount / $y) > 0.6){
+			$acidCount = $residue['acidCount'];
+			$baseCount = $residue['baseCount'];
+            
+			$abPercent = ($acidCount + $baseCount)/$y;
+			if( $abPercent <= 0.4 ){
+				$result_index = 3;
+				
+				if( ($baseCount / $y)>=0.25){
+					$result_index = 1;
+				}
+				
+				if( ($acidCount/$y)>=0.25){
+					$result_index = 2;
+				}
+				
+				return $result_index;
+		     }
+	    }
 	}
 
-    if($aminoCount<=5 && $hydrophily>-0.5){
-    	return $solubilityResults[2];
+    if($y<=5 && $x>-0.5){
+    	return 4;
     }
 	
-	if($hydrophily > 0){
-		$solubilityResult = $solubilityResults['2'];
-	}else if($hydrophily<=0 && $hydrophily>-1){
-		$solubilityResult = $solubilityResults['5'];
+	if($x>0 && $x<=0.5){
+		// 需要计算连续8个氨基酸的亲水性<=0
+		$acidAminoCount = 0;
+		$firstIndex = 0;
+		for($index=0, $standard_count=count($standardData); $index<$standard_count; $index++){
+			$standard = $standardData[$index];
+			$L = $standard['L'];
+			if($L<=0){
+				if($firstIndex==0){
+					$firstIndex = $index;
+				}
+				
+				$acidAminoCount++;
+			}else{
+				if($firstIndex==0){
+					continue;
+				}else{
+					break;
+				}
+			}
+		}
+		if($acidAminoCount>=8){
+			return 5;
+		}
+		
+	}
+	
+	if($x > 0){
+
+		return 4;
+		
+	}else if($x<=0 && $x>-1){
+		
+		$result_index = 9;
+
+		if( ($baseCount - $acidCount) >= 2 ){
+			// 需要计算连续8个氨基酸的亲水性<=0
+			$acidAminoCount = 0;
+			$firstIndex = 0;
+			for($index=0, $standard_count=count($standardData); $index<$standard_count; $index++){
+				$standard = $standardData[$index];
+				$L = $standard['L'];
+				if($L<=0){
+					if($firstIndex==0){
+						$firstIndex = $index;
+					}
+					
+					$acidAminoCount++;
+				}else{
+					if($firstIndex==0){
+						continue;
+					}else{
+						break;
+					}
+				}
+			}
+			if($acidAminoCount>=6){
+				return 6;
+			}
+		}
 		if( ($baseCount - $acidCount) >= 2){
-			$solubilityResult = $solubilityResults['3'];
+			return 7;
 		}
 		
 		if( ($acidCount - $baseCount)>=2 || ($acidCount>0 && $baseCount==0) ){
-			$solubilityResult = $solubilityResults['4'];
+			$solubilityResult = $solubilityResults[8];
+			return 8;
 		}
-	}else if($hydrophily<=-1){
-		$solubilityResult = $solubilityResults['7'];
+		return $result_index;
+	}else if($x<=-1 && $x>-2){
 		
-		if( ($acidCount - $baseCount)>2 || ($acidCount>0 && $baseCount==0)){
-			$solubilityResult = $solubilityResults['6'];
+		$result_index = 11;
+		
+		if( ($acidCount - $baseCount)>=2 || ($acidCount>0 && $baseCount==0)){
+			$result_index = 10;
 		}
+		return $result_index;
+	}else if($x<=-2){
+		$result_index = 12;
 	}
 	
-	return $solubilityResult;
+	return $result_index;
 }
 
 /**
