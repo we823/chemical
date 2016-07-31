@@ -37,7 +37,7 @@
 					<div class="form-group">
 						<div class="col-md-2 col-sm-2 col-xs-3 no-padding-right">
 							<select name="NTerm" id="NTerm" class="form-control">
-							<?php if(is_array($nterms)): foreach($nterms as $key=>$item): ?><option value="<?php echo ($item); ?>"><?php echo ($item); ?></option><?php endforeach; endif; ?>
+							<?php if(is_array($nterms)): foreach($nterms as $key=>$item): ?><option value="<?php echo ($item['A']); ?>"><?php echo ($item['A']); ?></option><?php endforeach; endif; ?>
 						</select>
 						</div>
 						
@@ -46,7 +46,7 @@
 						</div>
 						<div class="col-md-2 col-sm-2 col-xs-3 no-padding-left">
 							<select name="CTerm" id="CTerm" class="form-control">
-								<?php if(is_array($cterms)): foreach($cterms as $key=>$item): ?><option value="<?php echo ($item); ?>"><?php echo ($item); ?></option><?php endforeach; endif; ?>
+								<?php if(is_array($cterms)): foreach($cterms as $key=>$item): ?><option value="<?php echo ($item['A']); ?>"><?php echo ($item['A']); ?></option><?php endforeach; endif; ?>
 							</select>
 						</div>
 						<div class="col-md-1  col-sm-2 col-xs-12">
@@ -74,17 +74,16 @@
 		<script type="text/html" id="result_template">
 			<div class="col-md-12">
 			<ul class="list-unstyled">
+				<li class="col-md-12 col-sm-12"><b>1字符：</b>{{d.character1}}</li>
+				<li class="col-md-12 col-sm-12"><b>多字符：</b>{{d.character3}}</li>
 				<li class="col-md-4 col-sm-6"><b>氨基酸个数：</b>{{d.residue.count}}</li>
 				<li class="col-md-8 col-sm-6"><b>分子式：</b>{{d.molecularFomula}}</li>
-				<li class="col-md-4 col-sm-12"><b>1字符：</b>{{d.character1}}</li>
-				<li class="col-md-8 col-sm-12"><b>多字符：</b>{{d.character3}}</li>
-				
 				<li class="col-md-4 col-sm-6 hidden"><b>分子量：</b>{{d.residue.molecularWeight}}g/mol</li>
 				<li class="col-md-4 col-sm-6"><b>平均分子量(MW)：</b>{{d.mw}}g/mol</li>
 				<li class="col-md-8 col-sm-6"><b>精确分子量(Exact Mass)：</b>{{d.em}}</li>
 				<li class="col-md-4 col-sm-6"><b>等电点(PI)：</b>{{d.isoelectricPoint}}</li>
 				<li class="col-md-8 col-sm-6"><b>pH=7.0时的净电荷数：</b>{{d.pi7}}</li>
-				<li class="col-md-4 col-sm-6"><b>平均亲水性：</b>{{d.hydrophilyResult}}</li>
+				<li class="col-md-4 col-sm-6"><b>平均亲水性：</b><span title="亲水值：{{d.hydrophily}}">{{d.hydrophilyResult}}</span></li>
 				<li class="col-md-8 col-sm-12">
 					<b>溶解性：</b>{{d.solubilityResult}} 
 					<br><span style="color:#C0C0C0">( 备注：由于溶解性不仅与氨基酸的序列有关，也和产品所带的反离子有关，若溶解性遇到问题，可咨询我们的技术人员。)</span>
