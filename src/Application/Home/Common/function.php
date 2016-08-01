@@ -814,12 +814,15 @@ function calculateSolubility($residue, $character1, $standardData, $solubilityRe
     	return 4;
     }
 	
+	$amino_details = $residue['detail'];
+	$amino_detail_keys = array_keys($amino_details);
+	
 	if($x>0 && $x<=0.5){
 		// 需要计算连续8个氨基酸的亲水性<=0
 		$acidAminoCount = 0;
 		$firstIndex = 0;
-		for($index=0, $standard_count=count($standardData); $index<$standard_count; $index++){
-			$standard = $standardData[$index];
+		for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
+			$standard = $standardData[$amino_detail_keys[$index]];
 			$L = $standard['L'];
 			if($L<=0){
 				if($firstIndex==0){
@@ -850,11 +853,11 @@ function calculateSolubility($residue, $character1, $standardData, $solubilityRe
 		$result_index = 9;
 
 		if( ($baseCount - $acidCount) >= 2 ){
-			// 需要计算连续8个氨基酸的亲水性<=0
+			// 需要计算连续6个氨基酸的亲水性<=0
 			$acidAminoCount = 0;
 			$firstIndex = 0;
-			for($index=0, $standard_count=count($standardData); $index<$standard_count; $index++){
-				$standard = $standardData[$index];
+			for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
+				$standard = $standardData[$amino_detail_keys[$index]];
 				$L = $standard['L'];
 				if($L<=0){
 					if($firstIndex==0){
@@ -870,6 +873,7 @@ function calculateSolubility($residue, $character1, $standardData, $solubilityRe
 					}
 				}
 			}
+
 			if($acidAminoCount>=6){
 				return 6;
 			}
