@@ -37,9 +37,10 @@ function calculate($, laytpl){
 		$messageShow.removeClass('hidden');
 		return;
 	}
-	var url = 'index.php?m=home&c=index&a=result';
+	var $form = $('#form-data');
+	var url = $form.attr('action');
 	
-	$.post(url, {CTerm: $cterm, NTerm:$nterm, amino: $amino}, function(result){
+	$.post(url, $form.serialize(), function(result){
 		if(result){
 			if(result.hasError){
 				$messageShow.removeClass('alert-info').addClass('alert-danger').html(result.message);

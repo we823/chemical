@@ -45,7 +45,7 @@ class IndexController extends Controller {
 		   'nterm'=>$nterm
 		);
 	
-		/*if(is_null($this->chemicalData))*/ $this->chemicalData = init_data();
+		if(is_null($this->chemicalData)) $this->chemicalData = init_data();
 		
 		$result = calculateResult($this->chemicalData, $needCheckData);
 

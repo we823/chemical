@@ -280,6 +280,47 @@ function get_sub_amino($standard_data, $amino_max_length, $check_amino){
 	}
 }
 
+/**
+ * 检查2硫键
+ */
+function checkS2($amino_result_data, $s2){
+	$s2 = trim($s2);
+	$s2 = str_replace('，', ',', $s2);
+	$s2 = str_replace('-', ',', $s2);
+	
+	$slist = split(',', $s2);
+	
+	$hasValid = true;
+	$message = '二硫键位置正确'; 
+	
+	foreach($slist as $s){
+		if(is_numeric($s)){
+			$amino= $amino_result_data[intval($s-1)];
+		}else{
+			$hasValid = false;
+			$message = '输入的二硫键值不是数字：'.$s2;
+		}
+		
+		if(is_null($amino)){
+			$hasValid = false;
+			$message = '位置'.$s.'不存在氨基酸';
+			break;
+		}else{
+			if($amino!='C'){
+				$hasValid = false;
+				$message = '二硫键位置不正确,位置'.$s.'的氨基酸为：'.$amino;
+				break;
+			}
+		}
+	}
+	
+	if(!$hasValid){
+		return array(
+		   'hasError'=>true,
+		   'message'=>$message
+		);
+	}
+}
 function calculateResult($chemicalInitData, $needCheckData){
 	
 	$data = $needCheckData['amino'];
@@ -304,6 +345,15 @@ function calculateResult($chemicalInitData, $needCheckData){
 	$pk_data = $chemicalInitData['pkData'];
 	//标准的单字母序列信息
 	$standard_data = $chemicalInitData['standardData'];
+	
+	$s2 = I('s2');
+
+	if(!is_null($s2) && strlen($s2)>0){
+		$s2Result = checkS2($amino_result_data, $s2);
+		if($s2Result['hasError']){
+			return $s2Result;
+		}
+	}
 	//元素分子量固定值
 	$amino_const_data = $chemicalInitData['aminoConstData'];
 	

@@ -21,7 +21,7 @@
 			<div class="row">
 				<div class="jumbotron">
 					<h4>多肽计算器</h4>
-					<form action="index.php?m=home&c=index&a=result" method="post" class="form-horizontal" onsubmit="return false;">
+					<form id="form-data" action="index.php?m=home&c=index&a=result" method="post" class="form-horizontal" onsubmit="return false;">
 					<div class="form-group">
 						<label class="col-md-2 col-sm-2 col-xs-3 control-label">
 							氨基端
@@ -57,7 +57,33 @@
 							<button id="calculate-button" type="button" class="btn btn-primary pull-right"> 计算 </button>
 						</div>
 					</div>
-
+                    <div class="form-group">
+                    	<div class="col-md-2 col-sm-2 col-xs-3">
+							
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-6">
+							<label class="col-md-2 control-label no-padding-left no-padding-right">二硫键修饰&nbsp;</label>
+							<div class="col-md-4 no-padding-left">
+								<input class="form-control" type="text" name="s2" placeholder="格式：3-8,5-16">
+							</div>
+							
+							<label class="col-md-2 control-label no-padding-right">成环类型&nbsp;</label>
+							<div class="col-md-4 no-padding-left">
+								<select name="circle-type" class="form-control">
+									<option value="-1">选择类型</option>
+									<option value="0">主链成环</option>
+									<option value="1">侧链成环</option>
+									<option value="2">主（N端）侧（C端）成环</option>
+									<option value="3">侧（N端）主（C端）成环</option>
+									<option value="4">硫醚成环</option>
+								</select>
+							</div>
+							
+						</div>
+						<label class="col-md-2 col-sm-2 col-xs-3">
+							
+						</label>
+                    </div>
 				</form>
 				<div id="message-show" class="alert alert-danger hidden" role="alert">警告内容</div>
 				</div>
@@ -90,7 +116,7 @@
 				<li class="col-md-4 col-sm-6"><b>平均亲水性：</b><span title="亲水值：{{d.hydrophily}}">{{d.hydrophilyResult}}</span></li>
 				<li class="col-md-8 col-sm-12">
 					<b>溶解性：</b>{{d.solubilityResult}} 
-					<br><span style="color:#C0C0C0">( 备注：由于溶解性不仅与氨基酸的序列有关，也和产品所带的反离子有关，若溶解性遇到问题，可咨询我们的技术人员。)</span>
+					<br><span style="color:#666">( 备注：由于溶解性不仅与氨基酸的序列有关，也和产品所带的反离子有关，若溶解性遇到问题，可咨询我们的技术人员，我们可提供溶解方法或进行序列修饰以提高溶解性。)</span>
 				</li>
 			</ul>
 			</div>
