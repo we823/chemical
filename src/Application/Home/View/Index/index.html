@@ -64,13 +64,13 @@
 						<div class="col-md-6 col-sm-6 col-xs-6">
 							<label class="col-md-2 control-label no-padding-left no-padding-right">二硫键修饰&nbsp;</label>
 							<div class="col-md-4 no-padding-left">
-								<input class="form-control" type="text" name="s2" placeholder="格式：3-8,5-16">
+								<input class="form-control" type="text" id="s2" name="s2" placeholder="格式：3-8,5-16">
 							</div>
 							
 							<label class="col-md-2 control-label no-padding-right">成环类型&nbsp;</label>
 							<div class="col-md-4 no-padding-left">
 								<select name="circle-type" class="form-control">
-									<option value="-1">选择类型</option>
+									<option value="-1">未成环</option>
 									<option value="0">主链成环</option>
 									<option value="1">侧链成环</option>
 									<option value="2">主（N端）侧（C端）成环</option>
@@ -167,6 +167,7 @@
 		<script>
 			seajs.use('skin/default/index', function(index){
 				index.initCalculate({$cal}, "{$nterm|default='H-'}", "{$cterm|default='-OH'}");
+				index.sCheck();
 			})
 		</script>
 	</body>

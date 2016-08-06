@@ -18,6 +18,37 @@ define(function(require, exports, module){
 			$('#calculate-button').click();
 		}
 	};
+	
+	exports.sCheck = function(){
+       var $s2 = $('#s2');
+       var $messageShow = $('#message-show');
+       $s2.on('change', function(){
+       	    $messageShow.addClass('hidden');
+       	    var subject = $s2.val();
+       	    if(subject.length==0){
+       	    	return;
+       	    }
+		    var reg = /([1-9]*[0-9]+\-[1-9]*[0-9])/g;
+		    var result = subject.match(reg);//reg.exec(subject); //subject.matches(reg);
+
+		    var subjects = subject.split(',');
+		    var newSubjects = new Array();
+			for(index in subjects){
+				if(subjects[index].length>0){
+					newSubjects.push(subjects[index]);
+				}
+			}
+			
+			var resultLength = result==null ? 0 : result.length,
+			    newSubjectsLength = newSubjects.length;
+			    console.log(resultLength);
+			    console.log(newSubjectsLength);
+			if(resultLength < newSubjectsLength){
+				$messageShow.removeClass('alert-info').removeClass('hidden').addClass('alert-danger').html('输入的二硫键修饰格式不对，请输入类似3-8,9-15');
+			}
+		
+       });	
+	};
 
 });
 

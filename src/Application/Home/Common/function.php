@@ -232,7 +232,6 @@ function amino_to_array($chemical_init_data, $check_amino){
 	   'message'=>'校验正确',
 	   'aminoDetail'=>$result
 	);
-
 	return $valid_result;
 }
 
@@ -321,6 +320,7 @@ function checkS2($amino_result_data, $s2){
 		);
 	}
 }
+
 function calculateResult($chemicalInitData, $needCheckData){
 	
 	$data = $needCheckData['amino'];
@@ -512,6 +512,7 @@ function calculateResult($chemicalInitData, $needCheckData){
 	$result['hydrophilyResult'] = $hydrophilyResult;
     
 	//溶解性相关的文字信息
+	$residue['amino_result_data'] = $amino_result_data;
 	$solubility_results = $result_config['solubility_result'];
 	$result_index = calculateSolubility($residue, $character1, $standard_data, $solubility_results);
     $solubilityResult = $solubility_results[$result_index];
@@ -814,30 +815,24 @@ function calculateSolubility($residue, $character1, $standardData, $solubilityRe
     	return 4;
     }
 	
-	$amino_details = $residue['detail'];
-	$amino_detail_keys = array_keys($amino_details);
+	$amino_details = $residue['amino_result_data'];
+	$amino_detail_values = array_values($amino_details);
 	
 	if($x>0 && $x<=0.5){
 		// 需要计算连续8个氨基酸的亲水性<=0
 		$acidAminoCount = 0;
 		$firstIndex = 0;
 		for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
-			$standard = $standardData[$amino_detail_keys[$index]];
+			$standard = $standardData[$amino_detail_values[$index]];
+
 			$L = $standard['L'];
 			if($L<=0){
-				if($firstIndex==0){
-					$firstIndex = $index;
-				}
-				
 				$acidAminoCount++;
 			}else{
-				if($firstIndex==0){
-					continue;
-				}else{
-					break;
-				}
+				$acidAminoCount=0;
 			}
 		}
+
 		if($acidAminoCount>=8){
 			return 5;
 		}
@@ -857,20 +852,12 @@ function calculateSolubility($residue, $character1, $standardData, $solubilityRe
 			$acidAminoCount = 0;
 			$firstIndex = 0;
 			for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
-				$standard = $standardData[$amino_detail_keys[$index]];
+				$standard = $standardData[$amino_detail_values[$index]];
 				$L = $standard['L'];
 				if($L<=0){
-					if($firstIndex==0){
-						$firstIndex = $index;
-					}
-					
 					$acidAminoCount++;
 				}else{
-					if($firstIndex==0){
-						continue;
-					}else{
-						break;
-					}
+					$acidAminoCount=0;
 				}
 			}
 
