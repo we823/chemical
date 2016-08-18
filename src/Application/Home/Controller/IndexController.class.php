@@ -84,14 +84,24 @@ class IndexController extends Controller {
 	}
 	
 	function test(){
-		$subject = 'chainA(cyclo(KCDEFGL))chainB(cyclo(AEDCFGHI))';
+		$subject = 'chainA(KCDEFGL)chainB(AEDCFGHI)';
+		//$subject = 'DAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIA(HCl salt)';
+		//$subject = 'chainA(cyclo(KCDEFGL))chainB(AEDCFGHI)';
+		echo $subject.'<br>';
 		
+		$dataFilename = './data/data_full.xls';
 		
-		$aminoUtil = new \Com\Zhang\AminoUtil($subject);
+		$aminoUtil = new \Com\Zhang\AminoUtil($subject, 3);
+		$aminoUtil->initData($dataFilename);
 		$aminoSpecial = $aminoUtil->getAminoSpecial();
 		
-		var_dump($aminoSpecial);
-		echo 'test';
+		//echo '<br>aminoSpecial:-------------------------------------------><br>';
+		//print_r($aminoSpecial);
+		//$array = $aminoSpecial->toArray();
+		//echo json_encode($array, JSON_PRETTY_PRINT);
+		//var_dump($aminoSpecial->toArray());
+		echo '<br>single:----><br>'.$aminoSpecial->single;
+		echo '<br>full:-----><br>'.$aminoSpecial->full;
 	}
 	
 	

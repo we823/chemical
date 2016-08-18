@@ -1,18 +1,25 @@
 <?php
 	namespace Common\Model;
-	use Think\Model;
-	
-	class AminoDetailModel extends Model {
+
+	class AminoDetailModel {
 		private $original;
 		private $aminos = array();
 		private $sIndex = array();
+		
+		public function __set($name, $value){
+			$this->$name = $value;
+		}
+		
+		public function __get($name){
+			return $this->$name;
+		}
 		
 		/**
 		 * 放入氨基酸字母
 		 * @param $amino mixed 氨基酸单字母
 		 */
 		public function pushAmino($amino){
-			array_push($amino, $this->aminos);
+			array_push($this->aminos, $amino);
 		}
 		
 		/**
