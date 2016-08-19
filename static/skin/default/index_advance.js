@@ -94,10 +94,9 @@ function calculate($, laytpl){
 							});
 					    }
                     }
-                    if(result.residue){
-                    	for(var detail in result.residue.detail){
-						
-							laytpl(tableBodyTemplate).render(result.residue.detail[detail], function(h){
+                    if(result.aminoDetails){
+                    	for(var detail in result.aminoDetails){
+							laytpl(tableBodyTemplate).render(result.aminoDetails[detail], function(h){
 								$tableBody.append(h);
 							});
 						}

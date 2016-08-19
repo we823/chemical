@@ -8,13 +8,17 @@
 		private $aminoSpecial = null;
 		private $chemicalDatas = null;
 		
-		public function __construct($subject, $cycloType=-1){
+		public function __construct($subject, $elementIndex, $cycloType=-1){
 			
 			$this->subject = trim($subject);
 			$this->aminoSpecial = new \Common\Model\AminoSpecialModel;
 			$this->aminoSpecial->cycloType = $cycloType;
+			$this->aminoSpecial->elementIndex = $elementIndex;
 		}
 		
+		public function instance(){
+			return $this->aminoSpecial;
+		}
 		/**
 		 * 初始化excel表格相关的数据
 		 */
@@ -114,12 +118,14 @@
 			    'ctermData' => $cterm_data,
 			    'ntermData' => $nterm_data
 		     );
+			 
+			 $this->aminoSpecial->chemicalDatas = $this->chemicalDatas;
 		}
 
         /**
 		 * 获取根据输入序列分析后的对象
 		 */
-		public function getAminoSpecial(){
+		public function analyze(){
 			$subject = $this->subject;
 			
 			$this->aminoSpecial->original = $subject;
@@ -162,7 +168,6 @@
 			}
 			
 			$this->buildAminoInfo();
-			return $this->aminoSpecial;
 		}
 		
 		public function buildAminoInfo(){

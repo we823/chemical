@@ -4,7 +4,7 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<title>多肽计算器</title>
-		<link charset="utf-8" rel="stylesheet" href="static/asset/bootstrap/3.3.6/css/bootstrap.min.css">
+		<link charset="utf-8" rel="stylesheet" href="{:C('base')}/static/asset/bootstrap/3.3.6/css/bootstrap.min.css">
 		
         <style>
         	.no-padding-right{
@@ -21,37 +21,17 @@
 			<div class="row">
 				<div class="jumbotron">
 					<h4>多肽计算器</h4>
-					<form id="form-data" action="index.php?m=home&c=index&a=result" method="post" class="form-horizontal" onsubmit="return false;">
+					<form id="form-data" action="{:U('result_advance')}" method="post" class="form-horizontal" onsubmit="return false;">
 					<div class="form-group">
-						<label class="col-md-2 col-sm-2 col-xs-3 control-label">
-							氨基端
-						</label>
-						<label class="col-md-6 col-sm-6 col-xs-6 control-label">
+						<label class="col-md-10 col-sm-10 col-xs-10 control-label">
 							序列（可输入氨基酸单字母或多字母，单字母为大写字母）<a href="{:U('about')}" target="_blank"><i class="glyphicon glyphicon-question-sign"></i></a>
-						</label>
-						<label class="col-md-2 col-sm-2 col-xs-3 control-label">
-							羧基端
 						</label>
 					</div>
 					
 					<div class="form-group">
-						<div class="col-md-2 col-sm-2 col-xs-3 no-padding-right">
-							<select name="NTerm" id="NTerm" class="form-control">
-							<foreach name="nterms" item="item">
-								<option value="{$item['A']}">{$item['A']}</option>
-							</foreach>
-						</select>
-						</div>
 						
-						<div class="col-md-6 col-sm-6 col-xs-6 no-padding-left no-padding-right">
+						<div class="col-md-10 col-sm-10 col-xs-10 no-padding-left no-padding-right">
 							<input type="text" name="amino" value="{$amino|default=''}" class="form-control" id="amino">
-						</div>
-						<div class="col-md-2 col-sm-2 col-xs-3 no-padding-left">
-							<select name="CTerm" id="CTerm" class="form-control">
-								<foreach name="cterms" item="item">
-								   <option value="{$item['A']}">{$item['A']}</option>
-							    </foreach>
-							</select>
 						</div>
 						<div class="col-md-1  col-sm-2 col-xs-12">
 							<button id="calculate-button" type="button" class="btn btn-primary pull-right"> 计算 </button>
@@ -106,12 +86,11 @@
 			<ul class="list-unstyled">
 				<li class="col-md-12 col-sm-12"><b>1字符：</b>{{d.character1}}</li>
 				<li class="col-md-12 col-sm-12"><b>多字符：</b>{{d.character3}}</li>
-				<li class="col-md-4 col-sm-6"><b>氨基酸个数：</b>{{d.residue.count}}</li>
-				<li class="col-md-8 col-sm-6"><b>分子式：</b>{{d.molecularFomula}}</li>
-				<li class="col-md-4 col-sm-6 hidden"><b>分子量：</b>{{d.residue.molecularWeight}}g/mol</li>
+				<li class="col-md-4 col-sm-6"><b>氨基酸个数：</b>{{d.aminoCount}}</li>
+				<li class="col-md-8 col-sm-6"><b>分子式：</b>{{d.molecularFormula}}</li>
 				<li class="col-md-4 col-sm-6"><b>平均分子量(MW)：</b>{{d.mw}}g/mol</li>
 				<li class="col-md-8 col-sm-6"><b>精确分子量(Exact Mass)：</b>{{d.em}}</li>
-				<li class="col-md-4 col-sm-6"><b>等电点(PI)：</b>{{d.isoelectricPoint}}</li>
+				<li class="col-md-4 col-sm-6"><b>等电点(PI)：</b>{{d.pi}}</li>
 				<li class="col-md-8 col-sm-6"><b>pH=7.0时的净电荷数：</b>{{d.pi7}}</li>
 				<li class="col-md-4 col-sm-6"><b>平均亲水性：</b><span title="亲水值：{{d.hydrophily}}">{{d.hydrophilyResult}}</span></li>
 				<li class="col-md-8 col-sm-12">
@@ -136,7 +115,7 @@
                 <tfoot>
                 	<tr>
                 		<td>氨基酸总数</td>
-                		<td>{{d.residue.count}}</td>
+                		<td>{{d.aminoCount}}</td>
                 		<td></td>
                 	</tr>
                 	
@@ -150,22 +129,22 @@
 		<script id="table-body-template" type="text/html">
 			<tr>
 					<td>
-						{{d.name3}}
+						{{d.full}}
 					</td>
 					<td>
 						{{d.count}}
 					</td>
 					<td>
-					   {{d.mw}}
+					   {{d.residue}}
 					</td>
 				</tr>
 		</script>
 			
-		<script src="static/sea.js"></script>
-		<script src="static/skin/default/config.js"></script>
+		<script src="{:C('base')}/static/sea.js"></script>
+		<script src="{:C('base')}/static/skin/default/config.js"></script>
 		
 		<script>
-			seajs.use('skin/default/index', function(index){
+			seajs.use('skin/default/index_advance', function(index){
 				index.initCalculate({$cal}, "{$nterm|default='H-'}", "{$cterm|default='-OH'}");
 				index.sCheck();
 			})
