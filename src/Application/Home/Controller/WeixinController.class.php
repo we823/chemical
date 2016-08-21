@@ -227,79 +227,53 @@ class WeixinController extends Controller{
     }
 
     private function aminoCalculate($keyword){
-    	
-		if(is_null($this->chemicalData)) $this->chemicalData = init_data();
-		
-		$tools = split(',', $keyword);
-		
+    		
+    	$tools = split(',', $keyword);
 		if(count($tools)>1){
 			$keyword = strtoupper($tools[0]);
 		}
 		
 		$contentStr = '';
-		$nterm = '';
-		$cterm = '';
 		$amino = $keyword;
 		
-		$chemicalData = $this->chemicalData;
-		$ntermData = $chemicalData['ntermData'];
-		$ctermData = $chemicalData['ctermData'];
-		
-		// 根据nterm和cterm的参数，获取相关信息，分解出序列
-		$nterm_values = array_values($ntermData);
-		foreach($nterm_values as $nterm_value){
-			$A = $nterm_value['A'];
-			if(strpos($keyword, $A)===0){
-				$nterm = $A;
-				break;
-			}
-		}
-		
-		$cterm_values = array_values($ctermData);
-		foreach($cterm_values as $cterm_value){
-			$A = $cterm_value['A'];
-			$pos = strrpos($keyword, $cterm_value['A']);
-			$len = strlen($keyword)-strlen($cterm_value['A']);
+		$subject = $amino;
 
-			if($pos === $len){
-				$cterm = $A;
-				break;
-			}
-		}
-	
-		if(strlen($nterm)>0){
-			$amino = substr($keyword, strlen($nterm));
-		}else{
-			$nterm = 'H-';
-		}
+        $dataFilename = './data/data_full.xls';
+		$cycloType = I('circle-type', -1);
 		
-		if(strlen($cterm)>0){
-			$amino = substr($amino, 0, strlen($amino)-strlen($cterm));
-		}else{
-			$cterm = '-OH';
-		}
+		$standardIndex = C('standard_index');
 		
-		$needCheckData = array(
-		   'amino'=>$amino,
-		   'cterm'=>$cterm,
-		   'nterm'=>$nterm
-		);
-		$result = calculateResult($this->chemicalData, $needCheckData);
+        $aminoUtil = new \Com\Zhang\AminoUtil($subject, $standardIndex, $cycloType);
+		$aminoSpecial = $aminoUtil->instance();
+		
+		$aminoSpecial->elementIndex = C('element_index');
+		$aminoSpecial->standardIndex = $standardIndex;
+		$aminoSpecial->pkIndex = C('pk_index');
+		$aminoSpecial->constIndex = C('const_index');
+		$aminoSpecial->cycloTypes = C('cyclo_types');
+		$aminoSpecial->solubilityResults = C('solubility_result');
+		$aminoSpecial->hydrophilyResults = C('hydrophily_result');
+		
+		$aminoUtil->initData($dataFilename);
+		
+		$aminoUtil->analyze();
+		
+		$result = $aminoSpecial->getResult();
+		
 		if($result['hasError']){
 			$contentStr = $result['message'];
 		}else{
-			$residue = $result['residue'];
-			$contentStr = "氨基酸个数：".$residue['count']."\n"
-			              .'分子式：'.$result['molecularFomula']."\n"
+			$contentStr = "氨基酸个数：".$result['aminoCount']."\n"
+			              .'分子式：'.$result['molecularFormula']."\n"
 			              .'1字符：'.$result['character1']."\n"
 			              .'2字符:'.$result['character3']."\n"
 			              .'平均分子量(MW):'.$result['mw']."g/mol\n"
 			              .'精确分子量(Exact Mass):'.$result['em']."\n"
-			              .'等电点（PI）：'.$result['isoelectricPoint']."\n"
+			              .'等电点（PI）：'.$result['pi']."\n"
 			              .'pH=7时的净电荷：'.$result['pi7']."\n"
 			              .'亲水性：'.$result['hydrophilyResult']."\n"
 			              .'溶水性：'.$result['solubilityResult']."\n( 备注：由于溶解性不仅与氨基酸的序列有关，也和产品所带的反离子有关，若溶解性遇到问题，可咨询我们的技术人员。)\n"
-			              .'<a href="'.WEB_HOST.'"/index.php?cal=1&nterm='.$nterm.'&cterm='.$cterm.'&amino='.$amino.'">查看详情</a>';
+			              .'<a href="'.WEB_HOST.'/index.php/home/index/index_advance.html?cal=1&amino='.$amino.'">查看详情</a>';
 
 		}
 		return $contentStr;

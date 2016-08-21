@@ -4,10 +4,8 @@ define(function(require, exports, module){
     require('bootstrap');
 	
 	exports.initCalculate = function(cal, nterm, cterm){
-		
-		//console.log('init');
+
 		$('#calculate-button').on('click', function(){
-			//console.log('click');
 		    calculate($, laytpl, echarts);
 	    });
 	    
@@ -115,7 +113,6 @@ function calculate($, laytpl){
 }
 
 function initEcharts(result, echarts){
-	console.log(result);
 	var lineChart = echarts.init(document.getElementById('line-echarts'));
 	var ph=[];
 	var data = result.y,

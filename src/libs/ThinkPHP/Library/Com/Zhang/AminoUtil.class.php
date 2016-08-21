@@ -145,7 +145,6 @@
 			// 测试包含chain
 			if(strpos(strtolower($subject), 'chain')>-1){
 				$this->aminoSpecial->hasChain = true;
-				
 				$this->getChain($subject);
 
 			}else if(strpos(strtolower($subject), 'cyclo')>-1){ //包含环
@@ -282,7 +281,6 @@
 		 * 获取侧链信息
 		 */
 		private function getChain($subject){
-			
 			if(strpos($subject, 'chainA')>-1){
 				
 				$chainAResult = $this->stack($subject);
@@ -308,7 +306,6 @@
 		 */
 		private function analyChain($chainResult){
 			$amino = $chainResult['amino'];
-			
 			return $this->checkCyclo($amino);
 		}
 		
@@ -411,7 +408,6 @@
 				$aminoDetail = new \Common\Model\AminoDetailModel;
 				$aminoDetail->original = $subject;
 				$aminoDetail->aminos = $result['aminoDetail'];
-				
 				$this->checkS2($result['aminoDetail'], $aminoDetail);
 				return $aminoDetail;
 			}
@@ -422,7 +418,6 @@
 		 */
 		private function amino_to_array($chemical_init_data, $check_amino){
 			$standard_data = $chemical_init_data['standardData'];
-		
 			$amino_max_length = $chemical_init_data['aminoMaxLength'];
 			
 			$result = array();
@@ -437,8 +432,9 @@
 			}
 			
 			while($index < $amino_length){
-		
-				$current_amino_length = strlen($check_amino);
+				$current_amino_length = strlen($check_amino); //当前校验的字符串长度
+				
+				// 当前字符串长度与标准表最长的字符串长度进行比较
 				$sub_length = ($amino_max_length < $current_amino_length) ? $amino_max_length : $current_amino_length;
 				$sub_amino_result = $this->get_sub_amino($standard_data, $amino_max_length, $check_amino);
 				
@@ -454,7 +450,7 @@
 				}
 				
 				$sub_amino = $sub_amino_result['sub_amino'];
-		
+
 				if(array_key_exists($sub_amino, $standard_data)){
 				     array_push($result, $sub_amino);
 					 $sub_amino_length = $sub_amino_result['real_length'];
@@ -515,7 +511,7 @@
 			}
 		}
 
-/**
+        /**
 		 * 根据小括号获取内容
 		 */
 		private function stack($subject){

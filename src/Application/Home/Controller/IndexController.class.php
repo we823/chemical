@@ -33,7 +33,13 @@ class IndexController extends Controller {
 	
 	public function index_advance(){
 		
-		$this->assign('cal', 0);
+		$cal = I('cal', 0);
+		if($cal==1){
+			$amino = I('amino');
+			$this->assign('amino', $amino);
+		}
+		
+		$this->assign('cal', $cal);
 		$this->display('index_advance');
 	}
 	

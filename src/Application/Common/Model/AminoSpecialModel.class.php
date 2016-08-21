@@ -71,6 +71,7 @@
 		private $solubilityResult;
 		
 		private $hasError = false;
+		private $message = '';
 		
 		private $original;
 		private $cterm ;
@@ -126,7 +127,7 @@
 			   'solubilityResult'=>$this->solubilityResult,
 			   'solubilityIndex'=>$this->solubilityIndex,
 			   'hasError'=>$this->hasError,
-			   'message'=>''
+			   'message'=>$this->message
 			);
 		}
 	
@@ -191,10 +192,11 @@
 				$single = $single.'-';
 				$full = $full.'-';
 			}
+			
 			$single = $single . $cycloDetails['single'];
 			$full = $full . $cycloDetails['full'];
 			$sIndex = array_merge($sIndex, $cycloDetails['sIndex']);
-
+            
 			if(!checkNull($afterCyclo)){
 
 				$afterCycloDetails = $this->getAminoDatas($afterCyclo, $standard_data, 0);
@@ -275,11 +277,14 @@
 			$single = 'chainA('.$chainAResult['single'].')';
 			$full = 'chainA('.$chainAResult['full'].')';
 			
-			if(!is_null($chainB)){
+			if(!checkNull($chainB)){
 				$chainBResult = $this->getSingleChainResult($standard_data, $chainB);
 				$single = $single.'chainB('.$chainBResult['single'].')';
 			    $full = $full . 'chainB('.$chainBResult['full'].')';
 			}
+			
+			$single = $this->nterm .$single . $this->cterm;
+			$full = $this->nterm .$full . $this->cterm;
 			
 			return array(
 			   'single'=>$single,
@@ -349,7 +354,10 @@
 				$_hydrophily = $this->standardIndex['hydrophily'];
 				$_acid = $this->standardIndex['acid'];
 				$_base = $this->standardIndex['base'];
+				$_flag = $this->standardIndex['flag'];
 				
+				$singleFlags = array();
+				$index = 0;
 				foreach($aminos as $key=>$amino ){
 					$standardData = $standard_data[$amino];
 					
@@ -359,14 +367,36 @@
 					$A = $standardData[$_single];
 					$B = $standardData[$_full];
 					
+					$flag = $standardData[$_flag];
 					$_B = $B;
+					$_A = $A;
 					
+					// 处理由于在表格中term的特殊表示法，需要去除多余的-，2 Nterm 3 cterm 
+					if($flag==2){ 
+						$A = substr($A, 0, strlen($A)-1);
+						$B = substr($B, 0, strlen($B)-1);
+					}else if($flag==3){ //cterm
+						$A = substr($A, 1);
+						$B = substr($B, 1);
+					}
+
 					if(strlen($A)>1){
 						if($key>0){
 							$A = '-'.$A;
 						}
+						// 标记位置为多字母
+						$singleFlags[$index] = 1;
+					}else{
+						// 标记位置为单字母
+						$singleFlags[$index] = 0;
+						if($index>0){
+							// 当index大于0，则计算前一位置的是否为多字母，若是多字母，则加分割线
+							if($singleFlags[$index-1]==1){
+								$A = '-'.$A;
+							}
+						}
 					}
-					
+					$index++;
 					if(strlen($B)>1){
 						if($key>0){
 							$B = '-'.$B;
@@ -377,13 +407,13 @@
 					$full = $full . $B;
 					
 					// 具体氨基酸计算
-					$amino = $aminoDetails[$A];
+					$amino = $aminoDetails[$_A];
 					if(is_null($amino)){
-						$aminoDetails[$A]['count'] = 1;
-						$aminoDetails[$A]['full'] = $_B;
-						$aminoDetails[$A]['residue'] = $standardData[$_residue];
+						$aminoDetails[$_A]['count'] = 1;
+						$aminoDetails[$_A]['full'] = $_B;
+						$aminoDetails[$_A]['residue'] = $standardData[$_residue];
 					}else{
-						$aminoDetails[$A]['count'] ++;
+						$aminoDetails[$_A]['count'] ++;
 					}
 					
 					// 氨基酸总个数
@@ -396,7 +426,7 @@
 				}
 				
 				$this->aminoDetails = $aminoDetails;
-				
+
 				if($hasCyclo){
 					$single = 'cyclo('.$single.')';
 					$full = 'cyclo('.$full.')';

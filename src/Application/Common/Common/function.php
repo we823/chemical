@@ -23,7 +23,8 @@
 	}
 	
 	function checkNull($subject){
-		$isNull = false;
+		$isNull = is_null($subject);
+		
 		if(is_string($subject)){
 			$isNull = empty($subject);
 		}
