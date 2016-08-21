@@ -68,22 +68,18 @@ class IndexController extends Controller {
         $dataFilename = './data/data_full.xls';
 		$cycloType = I('circle-type', -1);
 		
-		$elementIndex = C('element_index');
 		$standardIndex = C('standard_index');
-		$pkIndex = C('pk_index');
-		$cycloTypes = C('cyclo_types');
-		$solubilityResults = C('solubility_result');
-		$hydrophilyResults = C('hydrophily_result');
 		
-        $aminoUtil = new \Com\Zhang\AminoUtil($subject, $elementIndex, $cycloType);
+        $aminoUtil = new \Com\Zhang\AminoUtil($subject, $standardIndex, $cycloType);
 		$aminoSpecial = $aminoUtil->instance();
 		
+		$aminoSpecial->elementIndex = C('element_index');
 		$aminoSpecial->standardIndex = $standardIndex;
-		$aminoSpecial->pkIndex = $pkIndex;
+		$aminoSpecial->pkIndex = C('pk_index');
 		$aminoSpecial->constIndex = C('const_index');
-		$aminoSpecial->cycloTypes = $cycloTypes;
-		$aminoSpecial->solubilityResults = $solubilityResults;
-		$aminoSpecial->hydrophilyResults = $hydrophilyResults;
+		$aminoSpecial->cycloTypes = C('cyclo_types');
+		$aminoSpecial->solubilityResults = C('solubility_result');
+		$aminoSpecial->hydrophilyResults = C('hydrophily_result');
 		
 		$aminoUtil->initData($dataFilename);
 		

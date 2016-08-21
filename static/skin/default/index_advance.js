@@ -115,6 +115,7 @@ function calculate($, laytpl){
 }
 
 function initEcharts(result, echarts){
+	console.log(result);
 	var lineChart = echarts.init(document.getElementById('line-echarts'));
 	var ph=[];
 	var data = result.y,

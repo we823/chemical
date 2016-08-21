@@ -53,6 +53,8 @@
 		private $minY;
 		// 分子式
 		private $molecularFormula;
+		// 分子式html
+		private $formulaHtml;
 		
 		private $otherAmino;
 		// 亲水性总值
@@ -75,6 +77,8 @@
 		private $nterm;
 		private $hasChain = false;
 		private $chains = array();
+		// 二硫键信息
+		private $sIndex = array();
 		
 		public function __set($name, $value){
 			$this->$name = $value;
@@ -114,6 +118,7 @@
 			   'maxY'=>$this->maxY,
 			   'minY'=>$this->minY,
 			   'molecularFormula'=>$this->molecularFormula,
+			   'formulaHtml'=>$this->formulaHtml,
 			   'otherAmino'=>$this->otherAmino,
 			   'hydrophily'=>$this->hydrophily,
 			   'hydrophilyResult'=>$this->hydrophilyResult,
@@ -124,23 +129,6 @@
 			   'message'=>''
 			);
 		}
-		
-		public function full(){
-			$full = '';
-			if($this->hasChain==false){
-				$full = $full . $this->chains[0];
-			}else{
-				$full = $this->getChain($full, 'A');
-				$full = $this->getChain($full, 'B');
-			}
-			
-			if($this->hasMemo){
-				$full = $full .'('.$this->memo.')';
-			}
-			
-			return $full;
-		}
-		
 	
 		private function getChain($full, $key){
 			$chain = $this->chains[$key];
@@ -171,6 +159,7 @@
 		   $this->full = $full;
 		   
 		   $this->buildElements();
+		   $this->fixElements();
 		   $this->buildElementInfos();
 
 		}
@@ -188,7 +177,8 @@
 			
 			$sIndex = array();
 
-			if(!is_null($preCyclo)){
+			if(!checkNull($preCyclo)){
+				
 				$preCycloDetails = $this->getAminoDatas($preCyclo, $standard_data, 0);
 				$single = $single . $preCycloDetails['single'];
 				$full = $full .$preCycloDetails['full'];
@@ -204,8 +194,8 @@
 			$single = $single . $cycloDetails['single'];
 			$full = $full . $cycloDetails['full'];
 			$sIndex = array_merge($sIndex, $cycloDetails['sIndex']);
-			
-			if(!is_null($afterCyclo)){
+
+			if(!checkNull($afterCyclo)){
 
 				$afterCycloDetails = $this->getAminoDatas($afterCyclo, $standard_data, 0);
 				$afterSingle = $afterCycloDetails['single'];
@@ -218,6 +208,8 @@
 				$sIndex = array_merge( $sIndex, $afterCycloDetails['sIndex']);
 			}
 			
+			$single = $this->nterm .$single . $this->cterm;
+			$full = $this->nterm .$full . $this->cterm;
 			
 			if($this->hasMemo==true){
 				$single = $single . '('. $this->memo. ')';
@@ -230,6 +222,7 @@
 			// 二硫键信息
 			$sIndexCount = count($sIndex);
 			$bridge = '';
+			$this->sIndex = $sIndex;
 			
 			if($sIndexCount>1){ //一对2硫键以上
 				for($index=0; $index<$sIndexCount; $index++){
@@ -399,6 +392,7 @@
 					$this->hydrophilyCount += $standardData[$_hydrophily];
 					$this->acidCount += $standardData[$_acid];
 					$this->baseCount += $standardData[$_base];
+
 				}
 				
 				$this->aminoDetails = $aminoDetails;
@@ -432,13 +426,52 @@
 					$standardData = $standard_data[$key];
 					if(!is_null($standardData)){
 						foreach($elementIndex as $key=>$index){
-							$elements[$key] = $standardData[$index] * $amino['count'];
+							$elements[$key] += $standardData[$index] * $amino['count'];
 						}
 					}
 				}
 			}
 			
+			if(isset($elements['H'])){
+				$elements['H'] += 2;
+			}
+			
+			if(isset($elements['O'])){
+				$elements['O'] += 1;
+			}
+			
 			$this->elements = $elements;
+		}
+		
+		/**
+		 * 根据二硫键信息及成环类型，修正元素个数
+		 */
+		private function fixElements(){
+			$elements = $this->elements;
+			$sIndex = $this->sIndex;
+			$cycloType = $this->cycloType;
+			
+			$sCount = count($sIndex);
+			if($sCount>0){
+				if($elements['H']>=2){
+					$this->elements['H'] -= 2*$sCount;
+				}
+			}
+			
+			if($cycloType==0 || $cycloType==1 || $cycloType==2 || $cycloType==3){
+				if($elements['H']>=2){
+					$this->elements['H'] -= 2;
+				}
+				if($elements['O']>0){
+					$this->elements['O'] -= 1;
+				}
+			}
+			
+			if($cycloType==4){
+				if($elements['H']>0){
+					$this->elements['H'] -= 1;
+				}
+			}
 		}
 		/**
 		 * 根据元素表计算分子相关信息
@@ -450,6 +483,7 @@
         	$elements = $this->elements;
 			// 分子式
 			$formula = '';
+			$formulaHtml = '';
 			// 平均分子量
 			$mw = 0;
 			// 精确分子量
@@ -461,6 +495,7 @@
 			foreach($elements as $key=>$value){
 				if($value>0){
 					$formula = $formula . $key . $value;
+					$formulaHtml = $formulaHtml . $key . '<sub>'.$value.'</sub>';
 					$constData = $constDatas[$key];
 					if(!is_null($constData)){
 						$mw += $constData[$_mw] * $value;
@@ -471,9 +506,11 @@
 			}
 			
 			$this->molecularFormula = $formula;
+			$this->formulaHtml = $formulaHtml;
 			$this->mw = sprintf("%.4f",$mw);
 			$this->em = sprintf("%.4f",$em);
 			
+			$this->fixHydrophilyCount();
 			$this->hydrophily = round($this->hydrophilyCount / $this->aminoCount, 2);
 			$this->hydrophilyResult = $this->getHydrophilyResult($this->hydrophily);
 			
@@ -492,6 +529,25 @@
 			
         }
 		
+		/**
+		 * 成环类型影响亲水性，需修正
+		 */
+		private function fixHydrophilyCount(){
+			$cycloType = $this->cycloType;
+			$hydrophilyCount = $this->hydrophilyCount;
+			
+			if($cycloType==0){
+				$hydrophilyCount -= 2;
+			}else if($cycloType==1){
+				$hydrophilyCount -= 4;
+			}else if($cycloType==2){
+				$hydrophilyCount -= 3;
+			}else if($cycloType==3){
+				$hydrophilyCount -= 3;
+			}
+			
+			$this->hydrophilyCount = $hydrophilyCount;
+		}
 		/**
 		 * 计算亲水性文字结果
 		 */
@@ -644,14 +700,91 @@
 			
 			return $result_index;
 		}
-
+        
+		/**
+		 * 二硫键及成环类型影响PI的计算，需要修正
+		 */
+		private function fixPrePI(){
+			$residue = $this->aminoDetails;
+			$cycloType = $this->cycloType;
+			
+			$cterm = ($this->cterm!='-NH2') ? 1 : 0;
+			$nterm = ($this->nterm!='Ac-') ? 1 : 0;
+			
+			$sIndex = $this->sIndex;
+			$sCount = count($sIndex);
+			
+			$Cys = $residue['C'];
+			$Lys = $residue['K'];
+			$Asp = $residue['D'];
+			
+			if($sCount>0){
+				if(isset($Cys)){
+					if($Cys['count']>2){
+						$Cys['count'] -= 2*$sCount;
+						$residue['C'] = $Cys;
+					}
+				}
+			}
+			
+			if($cycloType==0){
+				$cterm -= 1;
+				$nterm -= 1;
+			}else if($cycloType==1){
+				if(isset($Asp)){
+					if($Asp['count']>0){
+						$Asp['count'] -= 1;
+						$residue['D'] = $Asp;
+					}
+				}
+				
+				if(isset($Lys)){
+					if($Lys['count']>0){
+						$Lys['count'] -= 1;
+						$residue['K'] = $Lys;
+					}
+				}
+			}else if($cycloType==2){
+				if(isset($Asp)){
+					if($Asp['count']>0){
+						$Asp['count'] -= 1;
+						$residue['D'] = $Asp;
+					}
+				}
+				
+				$nterm -= 1;
+			}else if($cycloType==3){
+				if(isset($Lys)){
+					if($Lys['count']>0){
+						$Lys['count'] -= 1;
+						$residue['K'] = $Lys;
+					}
+				}
+				
+				$cterm -= 1;
+			}else if($cycloType==4){
+				if(isset($Cys)){
+					if($Cys['count']>0){
+						$Cys['count'] -= 1;
+						$residue['C'] = $Cys;
+					}
+				}
+			}
+			
+			return array(
+			   'residue'=>$residue,
+			   'nterm'=>$nterm,
+			   'cterm'=>$cterm
+			);
+		}
         /**
 		 * 计算等电点（PI）及 净电荷图例
 		 */
 		private function getPIResult(){
 			$result = null;
 			
-			$residue  = $this->aminoDetails;
+			$fixPiResult = $this->fixPrePI();
+			$residue  = $fixPiResult['residue'];
 			$pkData = $this->chemicalDatas['pkData'];
 		
 			if(!isset($residue) || !isset($pkData)){
@@ -665,8 +798,8 @@
 			
 			//保存y和ph的值
 			$piTemp = array(); 
-			$cterm = ($this->cterm!='-NH2') ? 1 : 0;
-			$nterm = ($this->nterm!='Ac-') ? 1 : 0;
+			$cterm = $fixPiResult['cterm'];
+			$nterm = $fixPiResult['nterm'];
 			
 			$ctermData = null;
 			$ntermData = null;
@@ -686,12 +819,14 @@
 			}
 			$detail = $residue;
 			$count = count($detail);
-		
+		    
+			$_pk = $this->pkIndex['pk'];
+			$_flag = $this->pkIndex['flag'];
 			foreach($detail as $k=>$value){
 				if(isset($pkData[$k])){
 					$tmp = $pkData[$k];
 					
-					if($tmp['D']==0){
+					if($tmp[$_flag]==0){
 						$flag0 += $value['count'];
 					}else{
 						$flag1 += $value['count'];
@@ -701,8 +836,6 @@
 		    
 			$pi = 0;
 			$minY = 0;
-			$_pk = $this->pkIndex['pk'];
-			$_flag = $this->pkIndex['flag'];
 			
 			for($index=0; $index<=1400; $index++){
 					

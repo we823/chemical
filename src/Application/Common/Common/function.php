@@ -21,3 +21,16 @@
 		curl_exec($ch);
 		curl_close($ch);
 	}
+	
+	function checkNull($subject){
+		$isNull = false;
+		if(is_string($subject)){
+			$isNull = empty($subject);
+		}
+		
+		if(is_array($subject)){
+			$isNull = is_null($subject);
+		}
+		
+		return $isNull;
+	}

@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title>多肽计算器</title>
+		<title>多肽计算器(精简版{:C('simple_version')})</title>
 		<link charset="utf-8" rel="stylesheet" href="static/asset/bootstrap/3.3.6/css/bootstrap.min.css">
 		
         <style>
@@ -67,16 +67,9 @@
 								<input class="form-control" type="text" id="s2" name="s2" placeholder="格式：3-8,5-16">
 							</div>
 							
-							<label class="col-md-2 control-label no-padding-right">成环类型&nbsp;</label>
+							
 							<div class="col-md-4 no-padding-left">
-								<select name="circle-type" class="form-control">
-									<option value="-1">未成环</option>
-									<option value="0">主链成环</option>
-									<option value="1">侧链成环</option>
-									<option value="2">主（N端）侧（C端）成环</option>
-									<option value="3">侧（N端）主（C端）成环</option>
-									<option value="4">硫醚成环</option>
-								</select>
+								复杂计算，请<a href="{:U('home/index/index_advance')}">点击</a>
 							</div>
 							
 						</div>

@@ -8,12 +8,14 @@
 		private $aminoSpecial = null;
 		private $chemicalDatas = null;
 		
-		public function __construct($subject, $elementIndex, $cycloType=-1){
+		private $standardIndex = null;
+		
+		public function __construct($subject, $standardIndex, $cycloType=-1){
 			
 			$this->subject = trim($subject);
+			$this->standardIndex = $standardIndex;
 			$this->aminoSpecial = new \Common\Model\AminoSpecialModel;
 			$this->aminoSpecial->cycloType = $cycloType;
-			$this->aminoSpecial->elementIndex = $elementIndex;
 		}
 		
 		public function instance(){
@@ -70,11 +72,15 @@
 				$standard_values = array_values($standard_sheetdata);
 				$pattern_values = array();
 				
+				$_single = $this->standardIndex['single'];
+				$_full = $this->standardIndex['full'];
+				$_flag = $this->standardIndex['flag'];
+				
 				for($index=1; $index < $standard_count; $index++){
 					$value = $standard_values[$index];
 					
-					$A = $value['A'];
-					$B = $value['B'];
+					$A = $value[$_single];
+					$B = $value[$_full];
 					
 					// 获取最长氨基酸字符长度
 					$a_length = strlen($A);
@@ -85,17 +91,19 @@
 					$standard_data[$A] = $value;
 					$standard_data[$B] = $value;
 					
-					$R = $value['R'];
-					if($R==1){
+					$flag = $value[$_flag];
+					if($flag==1){
 						array_push($pattern_values, $value);
 					}
 					
-					if($R==2){
-						array_push($nterm_data, $value);
+					if($flag==2){
+						$nterm_data[$A] = $value;
+						//array_push($nterm_data, $value);
 					}
 					
-		            if($R==3){
-		            	array_push($cterm_data, $value);
+		            if($flag==3){
+		            	$cterm_data[$A] = $value;
+		            	//array_push($cterm_data, $value);
 		            }
 				}
 			}
@@ -126,8 +134,9 @@
 		 * 获取根据输入序列分析后的对象
 		 */
 		public function analyze(){
-			$subject = $this->subject;
+			$this->getTerm();
 			
+			$subject = $this->subject;
 			$this->aminoSpecial->original = $subject;
 			
 			// 计算备注相关信息
@@ -167,11 +176,40 @@
 				$this->aminoSpecial->pushChains(0, $aminoChain);
 			}
 			
-			$this->buildAminoInfo();
+			$this->aminoSpecial->buildAminoInfo($this->chemicalDatas['standardData']);
 		}
 		
-		public function buildAminoInfo(){
-			$this->aminoSpecial->buildAminoInfo($this->chemicalDatas['standardData']);
+		/**
+		 * 分解nterm和cterm
+		 */
+		private function getTerm(){
+			$subject = $this->subject;
+			$nterm = 'H-';
+			$cterm = '-OH';
+			
+			$ntermData = $this->chemicalDatas['ntermData'];
+			$ctermData = $this->chemicalDatas['ctermData'];
+			
+			$aminos = split('-', $subject);
+			$amino_count = count($aminos);
+			
+			if($amino_count>0){
+				if(isset($ntermData[$aminos[0].'-'])){
+					$nterm = $aminos[0].'-';
+					$ntermLength = strlen($nterm);
+					$subject = substr($subject, $ntermLength);
+				}
+				
+				if(isset($ctermData['-'.$aminos[$amino_count-1]])){
+					$cterm = '-'.$aminos[$amino_count-1];
+					$ctermLength = strlen($cterm);
+					$subject = substr($subject, 0, strlen($subject) - $ctermLength);
+				}
+			}
+			
+			$this->aminoSpecial->nterm = $nterm;
+			$this->aminoSpecial->cterm = $cterm;
+			$this->subject = $subject;
 		}
 		
 		/**

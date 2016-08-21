@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title>多肽计算器</title>
+		<title>多肽计算器(专业版{:C('advance_version')})</title>
 		<link charset="utf-8" rel="stylesheet" href="{:C('base')}/static/asset/bootstrap/3.3.6/css/bootstrap.min.css">
 		
         <style>
@@ -87,7 +87,7 @@
 				<li class="col-md-12 col-sm-12"><b>1字符：</b>{{d.character1}}</li>
 				<li class="col-md-12 col-sm-12"><b>多字符：</b>{{d.character3}}</li>
 				<li class="col-md-4 col-sm-6"><b>氨基酸个数：</b>{{d.aminoCount}}</li>
-				<li class="col-md-8 col-sm-6"><b>分子式：</b>{{d.molecularFormula}}</li>
+				<li class="col-md-8 col-sm-6"><b>分子式：</b>{{d.formulaHtml}}</li>
 				<li class="col-md-4 col-sm-6"><b>平均分子量(MW)：</b>{{d.mw}}g/mol</li>
 				<li class="col-md-8 col-sm-6"><b>精确分子量(Exact Mass)：</b>{{d.em}}</li>
 				<li class="col-md-4 col-sm-6"><b>等电点(PI)：</b>{{d.pi}}</li>

@@ -1,6 +1,8 @@
 <?php
 return array(
 	//'配置项'=>'配置值'
+	'simple_version'=>'0.0.1',
+	'advance_version'=>'0.0.1',
 	'element_index'=>array(
 	   'C'=>'F',
 	   'H'=>'G',
@@ -15,6 +17,7 @@ return array(
 	  'full'=>'B',
 	  'residue'=>'E',
 	  'solubility'=>'M',
+	  'hydrophily'=>'N',
 	  'acid'=>'Q',
 	  'base'=>'R',
 	  'flag'=>'S'

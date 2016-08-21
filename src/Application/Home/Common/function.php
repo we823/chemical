@@ -38,7 +38,7 @@ function get_result_config(){
 function init_data() {
 	vendor('PHPExcel.PHPExcel.IOFactory');
 	$input_filetype = 'Excel5';
-	$input_filename = './data/data.xls';
+	$input_filename = './data/data_simple.xls';
 
 	$standard_sheetname = 'standard';
 	$pk_sheetname = 'pk';
