@@ -70,25 +70,34 @@ class IndexController extends Controller {
 		
 		$amino = I('amino');
 		$subject = $amino;
+        
+		// 二硫键信息
+		$s2 = I('s2');
+		$calculateS = $this->needCalculateS2($s2);
 
         $dataFilename = './data/data_full.xls';
 		$cycloType = I('circle-type', -1);
 		
 		$standardIndex = C('standard_index');
+		$pkIndex = C('pk_index');
+		$sideSpecialIndex = C('side_special_index');
 		
         $aminoUtil = new \Com\Zhang\AminoUtil($subject, $standardIndex, $cycloType);
+		$aminoUtil->pkIndex = $pkIndex;
+		$aminoUtil->sideSpecialIndex = $sideSpecialIndex;
 		$aminoSpecial = $aminoUtil->instance();
 		
 		$aminoSpecial->elementIndex = C('element_index');
 		$aminoSpecial->standardIndex = $standardIndex;
-		$aminoSpecial->pkIndex = C('pk_index');
+		$aminoSpecial->pkIndex = $pkIndex;
 		$aminoSpecial->constIndex = C('const_index');
 		$aminoSpecial->cycloTypes = C('cyclo_types');
 		$aminoSpecial->solubilityResults = C('solubility_result');
 		$aminoSpecial->hydrophilyResults = C('hydrophily_result');
+		$aminoSpecial->calculateS = $calculateS;
+		$aminoSpecial->customCys = $s2;
 		
 		$aminoUtil->initData($dataFilename);
-		
 		$aminoUtil->analyze();
 		
 		$result = $aminoSpecial->getResult();
@@ -123,5 +132,47 @@ class IndexController extends Controller {
 		var_dump($result);
 	}
 	
+	public function test2(){
+		$subject = 'Dabcyl-γ-Abu-SQNYPIV-Glu-Edans';
+		echo 'subject:'.$subject.'<br>';
+		$dataFilename = './data/data_full.xls';
+		$aminoSubject = new \Home\Model\AminoSubjectModel;
+		
+		$this->initBaseData($aminoSubject, $dataFilename);
+		$aminoSubject->analyze($subject);
+		$aminoSubject->buildAminoInfo();
+		$result = $aminoSubject->getResult();
+		var_dump($aminoSubject->mSingle);
+	}
 	
+	/**
+	 * 是否需要计算二硫键信息
+	 */
+	private function needCalculateS2($s2){
+		if(checkNull($s2)){
+			return false;
+		}
+		$pattern = '/([1-9]*[0-9]+\-[1-9]*[0-9])/';
+		$result = preg_match_all($pattern, $s2);
+		$sList = split($s2, ',');
+		if($result<count($sList)){
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 初始化相关的基础数据
+	 */
+	private function initBaseData(&$rAminoSubject, $excelFilename){
+		$base_index = C('base_index');
+		$result_type = C('result_type');
+		$default_value = C('default_value');
+		
+		$rAminoSubject->mBaseIndex = $base_index;
+		$rAminoSubject->mResultType = $result_type;
+		$rAminoSubject->mDefaultValue = $default_value;
+		
+		$rAminoSubject->loadBaseData($excelFilename);
+	}
 }

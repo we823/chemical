@@ -5,31 +5,21 @@
 	class AminoUtil{
 		
 		private $subject;
-		private $aminoSubject = null;
+		private $aminoSpecial = null;
 		private $chemicalDatas = null;
 		
 		private $standardIndex = null;
-		private $pkIndex = null;
-		private $sideSpecialIndex = null;
 		
 		public function __construct($subject, $standardIndex, $cycloType=-1){
 			
 			$this->subject = trim($subject);
 			$this->standardIndex = $standardIndex;
-			$this->aminoSubject = new \Common\Model\AminoSubjectModel;
-			$this->aminoSubject->cycloType = $cycloType;
-		}
-		
-		public function __set($name, $value){
-			$this->$name = $value;
-		}
-		
-		public function __get($name){
-			return $this->$name;
+			$this->aminoSpecial = new \Common\Model\AminoSpecialModel;
+			$this->aminoSpecial->cycloType = $cycloType;
 		}
 		
 		public function instance(){
-			return $this->aminoSubject;
+			return $this->aminoSpecial;
 		}
 		/**
 		 * 初始化excel表格相关的数据
@@ -92,17 +82,17 @@
 				for($index=1; $index < $standard_count; $index++){
 					$value = $standard_values[$index];
 					
-					$single = $value[$_single];
-					$full = $value[$_full];
+					$A = $value[$_single];
+					$B = $value[$_full];
 					
 					// 获取最长氨基酸字符长度
-					$single_length = strlen($single);
-					$full_length = strlen($full);
-					$single_length = ($single_length>$full_length) ? $single_length : $full_length;
-					$amino_max_length = ($single_length > $amino_max_length) ? $single_length : $amino_max_length;
+					$a_length = strlen($A);
+					$b_length = strlen($B);
+					$a_length = ($a_length>$b_length) ? $a_length : $b_length;
+					$amino_max_length = ($a_length > $amino_max_length) ? $a_length : $amino_max_length;
 		            
-					$standard_data[$single] = $value;
-					$standard_data[$full] = $value;
+					$standard_data[$A] = $value;
+					$standard_data[$B] = $value;
 					
 					$flag = $value[$_flag];
 					if($flag==1){
@@ -110,12 +100,12 @@
 					}
 					
 					if($flag==2 || $flag==4){
-						$nterm_data[$single] = $value;
+						$nterm_data[$A] = $value;
 						//array_push($nterm_data, $value);
 					}
 					
 		            if($flag==3 || $flag==5){
-		            	$cterm_data[$single] = $value;
+		            	$cterm_data[$A] = $value;
 		            	//array_push($cterm_data, $value);
 		            }
 				}
@@ -125,22 +115,20 @@
 			$pk_count=count($pk_sheetdata);
 			if($pk_count > 0){
 				$pk_values = array_values($pk_sheetdata);
-				$_pk_single = $this->pkIndex['single'];
+				
 				for($index=1; $index<$pk_count; $index++){
-					$pk_data[$pk_sheetdata[$index][$_pk_single]] = $pk_sheetdata[$index];
+					$pk_data[$pk_sheetdata[$index]['A']] = $pk_sheetdata[$index];
 				}
 			}
 			
 			$side_special_count = count($side_special_sheetdata);
 			if($side_special_count>0){
 				$side_special_values = array_values($side_special_sheetdata);
-				$_side_special_single = $this->sideSpecialIndex['single'];
 				for($index=1; $index<$side_special_count; $index++){
 					$side_special_tmp = $side_special_sheetdata[$index];
-					$side_special_data[$side_special_tmp[$_side_special_single]] = $side_special_tmp;
+					$side_special_data[$side_special_tmp['A']] = $side_special_tmp;
 				}
 			}
-			
 			$this->chemicalDatas = array(
 			    'aminoMaxLength'=>$amino_max_length+1,
 			    'standardData' => $standard_data, 
@@ -151,7 +139,7 @@
 			    'ntermData' => $nterm_data
 		     );
 			 
-			 $this->aminoSubject->chemicalDatas = $this->chemicalDatas;
+			 $this->aminoSpecial->chemicalDatas = $this->chemicalDatas;
 		}
 
         /**
@@ -161,29 +149,30 @@
 			$this->getTerm();
 			
 			$subject = $this->subject;
-			$this->aminoSubject->original = $subject;
+			$this->aminoSpecial->original = $subject;
 			
 			// 计算备注相关信息
 			$subject = $this->checkMemo($subject);
 			
 			// 测试包含chain
 			if(strpos(strtolower($subject), 'chain')>-1){
-				$this->aminoSubject->hasChain = true;
+				$this->aminoSpecial->hasChain = true;
 				$this->getChain($subject);
 
 			}else if(strpos(strtolower($subject), 'cyclo')>-1){ //包含环
-				$this->aminoSubject->hasChain = false;
+				$this->aminoSpecial->hasChain = false;
 				$aminoChain = $this->checkCyclo($subject);
-				$this->aminoSubject->pushChains(0, $aminoChain);
+				$this->aminoSpecial->pushChains(0, $aminoChain);
 				
 			}else{ //不包含环的内容
-				$this->aminoSubject->hasChain = false;
+				$this->aminoSpecial->hasChain = false;
+				//$this->aminoSpecial->pushChains(0, $subject);
 				
 				$aminoDetail = $this->getAminoDetail($subject);
 				
 				if(is_array($aminoDetail) && $aminoDetail['hasError']){
-					$this->aminoSubject->hasError = $aminoDetail['hasError'];
-					$this->aminoSubject->message = $aminoDetail['message'];
+					$this->aminoSpecial->hasError = $aminoDetail['hasError'];
+					$this->aminoSpecial->message = $aminoDetail['message'];
 					return;
 				}
 				
@@ -198,10 +187,10 @@
 				);
 				$aminoChain->cyclo = $cyclo;
 				$aminoChain->afterCyclo=null;
-				$this->aminoSubject->pushChains(0, $aminoChain);
+				$this->aminoSpecial->pushChains(0, $aminoChain);
 			}
 			
-			$this->aminoSubject->buildAminoInfo();
+			$this->aminoSpecial->buildAminoInfo($this->chemicalDatas['standardData']);
 		}
 		
 		/**
@@ -251,8 +240,8 @@
 				}
 			}
 			
-			$this->aminoSubject->nterm = $nterm;
-			$this->aminoSubject->cterm = $cterm;
+			$this->aminoSpecial->nterm = $nterm;
+			$this->aminoSpecial->cterm = $cterm;
 			$this->subject = $subject;
 		}
 		
@@ -265,16 +254,16 @@
 			$result = preg_match($pattern, $subject);
 			// 尾部不存在)
 			if($result==0){
-				$this->aminoSubject->hasMemo = false;
-				$this->aminoSubject->memo = 'no )';
+				$this->aminoSpecial->hasMemo = false;
+				$this->aminoSpecial->memo = 'no )';
 				return $subject;
 			}
 			
 			$stackResult = $this->reserve_stack($subject);
 			// 获取发生错误
 			if($stackResult==false){
-				$this->aminoSubject->hasMemo = false;
-				$this->aminoSubject->memo = 'error';
+				$this->aminoSpecial->hasMemo = false;
+				$this->aminoSpecial->memo = 'error';
 				return $subject;
 			}
 			
@@ -285,8 +274,8 @@
 				// 起始位置小于6，则不存在chain或cyclo
 				
 				if(strpos($amino, 'chain')>-1 || strpos($amino, 'cyclo')>-1){
-					$this->aminoSubject->hasMemo = false;
-					$this->aminoSubject->memo = 'has chain or cyclo';
+					$this->aminoSpecial->hasMemo = false;
+					$this->aminoSpecial->memo = 'has chain or cyclo';
 					return $subject;
 				}
 				
@@ -294,27 +283,27 @@
 				
 				$aminoResult = $this->amino_to_array($chemicalDatas, $amino);
 				if($aminoResult['hasError']==true){
-					$this->aminoSubject->hasMemo = true;
-					$this->aminoSubject->memo = $amino;
+					$this->aminoSpecial->hasMemo = true;
+					$this->aminoSpecial->memo = $amino;
 					
 					$subject = substr($subject, 0, strlen($subject) - strlen($memo) - 2);
 					return $subject;
 				}
 				
-				$this->aminoSubject->hasMemo = false;
-				$this->aminoSubject->memo = '可转化';
+				$this->aminoSpecial->hasMemo = false;
+				$this->aminoSpecial->memo = '可转化';
 				return $subject;
 			}
 			
 			$preSubject = substr($subject, $startIndex-6);
 	
 			if(strpos($preSubject, 'chain')>-1 || strpos($preSubject, 'cyclo')>-1){
-				$this->aminoSubject->hasMemo = false;
-				$this->aminoSubject->memo = 'has chain or cyclo';
+				$this->aminoSpecial->hasMemo = false;
+				$this->aminoSpecial->memo = 'has chain or cyclo';
 				return $subject;
 			}else{
-				$this->aminoSubject->hasMemo = true;
-				$this->aminoSubject->memo = $amino;
+				$this->aminoSpecial->hasMemo = true;
+				$this->aminoSpecial->memo = $amino;
 				
 				$subject = substr($subject, 0, strlen($subject) - strlen($amino) - 2);
 				return $subject;
@@ -331,7 +320,7 @@
 				$chainAResult = $this->stack($subject);
 				$aminoChain = $this->analyChain($chainAResult);
 				
-				$this->aminoSubject->pushChains('A', $aminoChain);
+				$this->aminoSpecial->pushChains('A', $aminoChain);
 
 				$endIndex = $chainAResult['endIndex'];		
 				$subject = substr($subject, $endIndex+1);
@@ -341,7 +330,7 @@
 			if(strpos($subject, 'chainB')>-1){
 				$chainBResult = $this->stack($subject);
 				$aminoChainB = $this->analyChain($chainBResult);
-				$this->aminoSubject->pushChains('B', $aminoChainB);
+				$this->aminoSpecial->pushChains('B', $aminoChainB);
 			}
 
 		}

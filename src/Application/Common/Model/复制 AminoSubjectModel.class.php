@@ -2,7 +2,7 @@
 	
 	namespace Common\Model;
 	
-	class AminoSpecialModel{
+	class AminoSubjectModel{
 		// 比对的标准数据
 		private $chemicalDatas;
 		// 元素在表格对应的关系
@@ -37,9 +37,13 @@
 		private $acidCount = 0;
 		// 碱基个数
 		private $baseCount = 0;
-		// 氨基酸具体详情，标记具体个数
+		/**
+		 * 氨基酸具体详情，标记具体个数
+		 */ 
 		private $aminoDetails=array();
-		// 具体的元素个数，根据$aminoDetails计算
+		/**
+		 * 具体的元素个数，根据$aminoDetails计算
+		 */ 
 		private $elements=array();
 		
 		private $y;
@@ -55,7 +59,7 @@
 		private $molecularFormula;
 		// 分子式html
 		private $formulaHtml;
-		
+		// NCTerm需要在前端显示
 		private $otherAmino;
 		// 亲水性总值
 		private $hydrophilyCount = 0;
@@ -78,8 +82,19 @@
 		private $nterm;
 		private $hasChain = false;
 		private $chains = array();
-		// 二硫键信息
+		// cys所在位置信息
 		private $sIndex = array();
+		// 当用户输入需要计算二硫键时才计算
+		private $calculateS = false;
+		/**
+		 * 自定义二硫键位置标识
+		 */
+		private $customCys;
+		private $cysRealIndex = array();
+		/**
+		 *  当环类型选择正确时标记
+		 */
+		private $cycloTypeCorect=false;
 		
 		public function __set($name, $value){
 			$this->$name = $value;
@@ -141,7 +156,8 @@
 			return $full;
 		}
 		
-		public function buildAminoInfo($standard_data){
+		public function buildAminoInfo(){
+			$standard_data = $this->chemicalDatas['standardData'];
 			
 			$single = '';
 			$full = '';
@@ -159,12 +175,20 @@
            $this->single = $single;
 		   $this->full = $full;
 		   
+		   $this->fixMAP();
+		   $this->getOtherAmino();
 		   $this->buildElements();
 		   $this->fixElements();
 		   $this->buildElementInfos();
-
 		}
 
+        /**
+		 * 二硫键计算
+		 */
+        private function customCysCalculate(){
+        	$customCys = $this->customCys;
+			
+        }
         private function getNoChainResult($standard_data){
         	$single = '';
 			$full = '';
@@ -210,8 +234,10 @@
 				$sIndex = array_merge( $sIndex, $afterCycloDetails['sIndex']);
 			}
 			
-			$single = $this->nterm .$single . $this->cterm;
-			$full = $this->nterm .$full . $this->cterm;
+			$ncTermResult = $this->plusNCTerm($single, $full);
+			$single = $ncTermResult['single'];
+			$full = $ncTermResult['full'];
+			
 			
 			if($this->hasMemo==true){
 				$single = $single . '('. $this->memo. ')';
@@ -226,7 +252,7 @@
 			$bridge = '';
 			$this->sIndex = $sIndex;
 			
-			if($sIndexCount>1){ //一对2硫键以上
+			if($sIndexCount>1 && $this->calculateS){ //一对2硫键以上
 				for($index=0; $index<$sIndexCount; $index++){
 					$bridge = $bridge . 'Cys'.$sIndex[$index];
 					if($index<($sIndexCount-1)){
@@ -283,12 +309,11 @@
 			    $full = $full . 'chainB('.$chainBResult['full'].')';
 			}
 			
-			$single = $this->nterm .$single . $this->cterm;
-			$full = $this->nterm .$full . $this->cterm;
+			$ncTermResult = $this->plusNCTerm($single, $full);
 			
 			return array(
-			   'single'=>$single,
-			   'full'=>$full
+			   'single'=>$ncTermResult['single'],
+			   'full'=>$ncTermResult['full']
 			);
 		}
 
@@ -415,14 +440,6 @@
 					}else{
 						$aminoDetails[$_A]['count'] ++;
 					}
-					
-					// 氨基酸总个数
-					$this->aminoCount ++;
-					// 亲水性总值计算
-					$this->hydrophilyCount += $standardData[$_hydrophily];
-					$this->acidCount += $standardData[$_acid];
-					$this->baseCount += $standardData[$_base];
-
 				}
 				
 				$this->aminoDetails = $aminoDetails;
@@ -447,17 +464,28 @@
 			$elements = $this->elements;
 			
 			$elementIndex = $this->elementIndex;
+	
 			if(count($aminoDetails)==0){
 				foreach($elementIndex as $key=>$index){
 					$elements[$key] = 0;
 				}
 			}else{
+				$_hydrophily = $this->standardIndex['hydrophily'];
+				$_acid = $this->standardIndex['acid'];
+				$_base = $this->standardIndex['base'];
+				
 				foreach($aminoDetails as $key=>$amino){
 					$standardData = $standard_data[$key];
 					if(!is_null($standardData)){
 						foreach($elementIndex as $key=>$index){
 							$elements[$key] += $standardData[$index] * $amino['count'];
 						}
+						
+						$this->aminoCount += $amino['count'];
+						// 亲水性总值计算
+						$this->hydrophilyCount += $standardData[$_hydrophily];
+						$this->acidCount += $standardData[$_acid];
+						$this->baseCount += $standardData[$_base];
 					}
 				}
 			}
@@ -465,7 +493,6 @@
 			if(isset($elements['H'])){
 				$elements['H'] += 2;
 			}
-			
 			if(isset($elements['O'])){
 				$elements['O'] += 1;
 			}
@@ -482,26 +509,29 @@
 			$cycloType = $this->cycloType;
 			
 			$sCount = count($sIndex);
-			if($sCount>0){
+
+			if($sCount>1 && $this->calculateS){
 				if($elements['H']>=2){
-					$this->elements['H'] -= 2*$sCount;
+					$this->elements['H'] -= 2*($sCount/2);
 				}
 			}
 			
-			if($cycloType==0 || $cycloType==1 || $cycloType==2 || $cycloType==3){
-				if($elements['H']>=2){
-					$this->elements['H'] -= 2;
+			if($this->cycloTypeCorect){
+				if($cycloType==0 || $cycloType==1 || $cycloType==2 || $cycloType==3){
+					if($elements['H']>=2){
+						$this->elements['H'] -= 2;
+					}
+					if($elements['O']>0){
+						$this->elements['O'] -= 1;
+					}
 				}
-				if($elements['O']>0){
-					$this->elements['O'] -= 1;
+				if($cycloType==4){
+					if($elements['H']>0){
+						$this->elements['H'] -= 1;
+					}
 				}
 			}
 			
-			if($cycloType==4){
-				if($elements['H']>0){
-					$this->elements['H'] -= 1;
-				}
-			}
 		}
 		/**
 		 * 根据元素表计算分子相关信息
@@ -509,7 +539,7 @@
         private function buildElementInfos(){
         	$chemicalDatas = $this->chemicalDatas;
 			$constDatas = $chemicalDatas['aminoConstData'];
-			
+
         	$elements = $this->elements;
 			// 分子式
 			$formula = '';
@@ -738,28 +768,32 @@
 			$residue = $this->aminoDetails;
 			$cycloType = $this->cycloType;
 			
-			$cterm = ($this->cterm!='-NH2') ? 1 : 0;
-			$nterm = ($this->nterm!='Ac-') ? 1 : 0;
+			$ntermData = $this->chemicalDatas['ntermData'];
+			$ctermData = $this->chemicalDatas['ctermData'];
+			
+			$_ncvalue = $this->standardIndex['ncterm'];
+			$cterm_value = $ctermData[$this->cterm][$_ncvalue];
+			$nterm_value = $ntermData[$this->nterm][$_ncvalue];
 			
 			$sIndex = $this->sIndex;
 			$sCount = count($sIndex);
-			
+
 			$Cys = $residue['C'];
 			$Lys = $residue['K'];
 			$Asp = $residue['D'];
 			
-			if($sCount>0){
+			if($sCount>1 && $this->calculateS){
 				if(isset($Cys)){
 					if($Cys['count']>2){
-						$Cys['count'] -= 2*$sCount;
+						$Cys['count'] -= 2* ($sCount/2);
 						$residue['C'] = $Cys;
 					}
 				}
 			}
 			
 			if($cycloType==0){
-				$cterm -= 1;
-				$nterm -= 1;
+				$cterm_value -= 1;
+				$nterm_value -= 1;
 			}else if($cycloType==1){
 				if(isset($Asp)){
 					if($Asp['count']>0){
@@ -782,7 +816,7 @@
 					}
 				}
 				
-				$nterm -= 1;
+				$nterm_value -= 1;
 			}else if($cycloType==3){
 				if(isset($Lys)){
 					if($Lys['count']>0){
@@ -791,7 +825,7 @@
 					}
 				}
 				
-				$cterm -= 1;
+				$cterm_value -= 1;
 			}else if($cycloType==4){
 				if(isset($Cys)){
 					if($Cys['count']>0){
@@ -803,8 +837,8 @@
 			
 			return array(
 			   'residue'=>$residue,
-			   'nterm'=>$nterm,
-			   'cterm'=>$cterm
+			   'nterm_value'=>$nterm_value,
+			   'cterm_value'=>$cterm_value
 			);
 		}
         /**
@@ -828,8 +862,8 @@
 			
 			//保存y和ph的值
 			$piTemp = array(); 
-			$cterm = $fixPiResult['cterm'];
-			$nterm = $fixPiResult['nterm'];
+			$cterm_value = $fixPiResult['cterm_value'];
+			$nterm_value = $fixPiResult['nterm_value'];
 			
 			$ctermData = null;
 			$ntermData = null;
@@ -838,12 +872,12 @@
 			$flag0 =0;
 			//正值的个数
 			$flag1 =0;
-			if($cterm == 1){
+			if($cterm_value == 1){
 				$ctermData = $pkData['C-term'];
 				$flag0++;
 			}
 			
-			if($nterm == 1){
+			if($nterm_value == 1){
 				$ntermData = $pkData['N-term'];
 				$flag1++;
 			}
@@ -953,5 +987,94 @@
 			}
 			
 			return $y;
+		}
+		
+		private function plusNCTerm($single, $full){
+			// cterm和nterm默认需要隐藏的残基
+			$default_nterm = C('default_value')['nterm'];
+			$default_cterm = C('default_value')['cterm'];
+			$nterm = ($this->nterm==$default_nterm) ? '' : $this->nterm;
+			$cterm = $this->cterm==$default_cterm ? '' : $this->cterm;
+			
+			if(!checkNull($nterm) && preg_match('/-$/', $nterm)==0){
+				$nterm = $nterm . '-';
+			}
+			
+			if(!checkNull($cterm) && preg_match('/^-/', $cterm)==0){
+				$cterm = '-'.$cterm;
+			}
+			$single = $nterm .$single . $cterm;
+			$full = $nterm .$full . $cterm;
+			
+			return array(
+			  'single'=>$single,
+			  'full'=>$full
+			);
+		}
+		
+		/**
+		 * 在前端显示除H和OH外的其他N/C-Term氨基酸
+		 */
+		private function getOtherAmino(){
+			$defaultValue = C('default_value');
+			$ntermData = $this->chemicalDatas['ntermData'];
+			$ctermData = $this->chemicalDatas['ctermData'];
+			
+			$nterm = $this->nterm;
+			$cterm = $this->cterm;
+			
+			$_full = $this->standardIndex['full'];
+			$_residue = $this->standardIndex['residue'];
+			
+			if($defaultValue['nterm']!= $nterm){
+				$_tmp = $ntermData[$nterm];
+				$this->otherAmino[$nterm] = array(
+				  'full'=>$_tmp[$_full],
+				  'count'=>1,
+				  'residue'=>$_tmp[$_residue]
+				);
+			}
+			
+			if($defaultValue['cterm']!=$cterm){
+				$_tmp = $ctermData[$cterm];
+				$this->otherAmino[$cterm] = array(
+				  'full'=>$_tmp[$_full],
+				  'count'=>1,
+				  'residue'=>$_tmp[$_residue]
+				);
+			}
+		}
+		
+		/**
+		 * 修订MAP相关数字，当序列中存在MAP时，则其他氨基酸数量要增加
+		 */
+		private function fixMAP(){
+			$aminoDetails = $this->aminoDetails;
+			$amino_keys = array_keys($aminoDetails);
+			$hasMap = false;
+			$number = 0;
+			foreach($amino_keys as $key){
+				$location = strpos($key, 'MAP');
+				if($location >-1){
+					$hasMap = true;
+					$number = substr($key, $location + 3);
+					if(is_numeric($number)){
+						$number = intval($number);
+					}
+					
+					break;
+				}
+			}
+
+			if($hasMap){
+				foreach($amino_keys as $key){
+					if(strpos($key, 'MAP')==false){
+						$this->aminoDetails[$key]['count'] = $this->aminoDetails[$key]['count'] * $number;
+					}
+				}
+
+				$this->cterm = $this->cterm * $number;
+				$this->nterm = $this->nterm * $number;
+			}
 		}
 	}
