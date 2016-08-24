@@ -64,7 +64,7 @@ class IndexController extends Controller {
 		$this->ajaxReturn($result);
 	}
 	
-	public function result_advance(){
+	public function result_advance2(){
 		header('Access-Control-Allow-Origin:'.$_SERVER['HTTP_ORIGIN']);
 		header('Access-Control-Allow-Credentials:true');
 		
@@ -132,9 +132,13 @@ class IndexController extends Controller {
 		var_dump($result);
 	}
 	
-	public function test2(){
-		$subject = 'Dabcyl-γ-Abu-SQNYPIV-Glu-Edans';
-		echo 'subject:'.$subject.'<br>';
+	public function result_advance(){
+		header('Access-Control-Allow-Origin:'.$_SERVER['HTTP_ORIGIN']);
+		header('Access-Control-Allow-Credentials:true');
+		
+		$amino = I('amino');
+		$subject = $amino;
+		
 		$dataFilename = './data/data_full.xls';
 		$aminoSubject = new \Home\Model\AminoSubjectModel;
 		
@@ -142,7 +146,8 @@ class IndexController extends Controller {
 		$aminoSubject->analyze($subject);
 		$aminoSubject->buildAminoInfo();
 		$result = $aminoSubject->getResult();
-		var_dump($aminoSubject->mSingle);
+		
+		$this->ajaxReturn($result);
 	}
 	
 	/**

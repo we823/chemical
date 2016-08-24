@@ -7,3 +7,6 @@
 	
 	var_dump($result);
 	var_dump($items);
+	
+	
+	var_dump(trim(null));

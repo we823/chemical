@@ -55,9 +55,21 @@ class AminoSubjectModel{
 	 */ 
 	private $mAminoDetails=array();
 	/**
+	 * 和分子式相关的具体集合
+	 */
+	private $mElementAminos = array();
+	/**
 	 * 具体的元素个数，根据$aminoDetails计算
 	 */ 
 	private $mElements=array();
+	/**
+	 * 和PI相关的氨基酸集合
+	 */
+	private $mPiAminos = array();
+	/**
+	 * 记录氨基酸所在位置，用于二硫键校验
+	 */
+	private $mAminoLocation = array();
 	/**
 	 * 等电点在PH1-14的值
 	 */
@@ -166,33 +178,38 @@ class AminoSubjectModel{
 	 */
 	public function getResult(){
 		return array(
-		   'single'=>$this->single,
-		   'full'=>$this->full,
-		   'aminoCount'=>$this->aminoCount,
-		   'acidCount'=>$this->acidCount,
-		   'baseCount'=>$this->baseCount,
-		   'aminoDetails'=>$this->aminoDetails,
-		   'elements'=>$this->elements,
-		   'mw'=>$this->mw,
-		   'em'=>$this->em,
-		   'y'=>$this->y,
-		   'pi'=>$this->pi,
-		   'pi7'=>$this->pi7,
-		   'maxY'=>$this->maxY,
-		   'minY'=>$this->minY,
-		   'formula'=>$this->molecularFormula,
-		   'formulaHtml'=>$this->formulaHtml,
-		   'otherAmino'=>$this->otherAmino,
-		   'hydrophily'=>$this->hydrophily,
-		   'hydrophilyResult'=>$this->hydrophilyResult,
-		   'amino_result_data'=>$this->amino_result_data,
-		   'solubilityResult'=>$this->solubilityResult,
-		   'solubilityIndex'=>$this->solubilityIndex,
-		   'hasError'=>$this->hasError,
-		   'message'=>$this->message
+		   'single'=>$this->mSingle,
+		   'full'=>$this->mFull,
+		   'aminoCount'=>$this->mAminoCount,
+		   'acidCount'=>$this->mAcidCount,
+		   'baseCount'=>$this->mBaseCount,
+		   'aminoDetails'=>$this->mAminoDetails,
+		   'elementAminos'=>$this->mElementAminos,
+		   'elements'=>$this->mElements,
+		   'piAminos'=>$this->mPiAminos,
+		   'aminoLocation'=>$this->mAminoLocation,
+		   'mw'=>$this->mMw,
+		   'em'=>$this->mEm,
+		   'y'=>$this->mY,
+		   'pi'=>$this->mPi,
+		   'pi7'=>$this->mPi7,
+		   'maxY'=>$this->mMaxY,
+		   'minY'=>$this->mMinY,
+		   'formula'=>$this->mFormula,
+		   'formulaHtml'=>$this->mFormulaHtml,
+		   'otherAmino'=>$this->mOtherAmino,
+		   'hydrophily'=>$this->mHydrophily,
+		   'hydrophilyResult'=>$this->mHydrophilyResult,
+		   'solubilityResult'=>$this->mSolubilityResult,
+		   'solubilityIndex'=>$this->mSolubilityIndex,
+		   'hasError'=>$this->mHasError,
+		   'message'=>$this->mMessage
 		);
 	}
     
+	public function __toString(){
+		return 'hasError: '.$this->mHasError.' message: '.$this->mMessage.' single: '.$this->mSingle.' full:'.$this->mFull;
+	}
 	/**
 	 * 加载excel表格数据
 	 */
@@ -230,15 +247,17 @@ class AminoSubjectModel{
 		$side_special_data = array();
 
 		$base_index = $this->mBaseIndex;
-		$const_index_single = $base_index['const_index']['single'];
+		$const_index_name = $base_index['const_index']['name'];
 		// 获取元素常量
 		if (($const_count = count($amino_const_sheetdata)) > 0) {
 			$const_values = array_values($amino_const_sheetdata);
+	
 			for ($index = 1; $index < $const_count; $index++) {
-				$amino_const_data[$const_values[$index][$const_index_single]] = $const_values[$index];
+				$amino_const_data[$const_values[$index][$const_index_name]] = $const_values[$index];
 			}
 		}
 	    
+		
 		$standard_count = count($standard_sheetdata);
 		// 获取氨基酸数据及匹配模式
 		if ($standard_count > 0) {
@@ -316,18 +335,17 @@ class AminoSubjectModel{
 	 * 分析序列
 	 */
     public function analyze($subject){
+
     	// 1. 获取备注信息
     	$this->mOriginal = $subject;
     	$subject = $this->checkMemo($subject);
 		$this->mSubject = $subject;
-		
+
 		//2. 获取nterm及cterm
 	    $this->getTerm();
 		
 		//3. 分析中间序列
 		$this->analyzeMiddleSubject();
-
-		
     }
     /**
 	 * 检测序列中是否包含备注信息
@@ -431,7 +449,7 @@ class AminoSubjectModel{
 		$amino_count = count($aminos);
         
 		$standard_single = $this->mBaseIndex['standard_index']['single'];
-		
+		$standard_resiude = $this->mBaseIndex['standard_index']['residue'];
 		if($amino_count>0){
 			$tmp_amino = $aminos[0];
 			$amino_nterm = isset($nterm_data[$tmp_amino]) ? $nterm_data[$tmp_amino] : $nterm_data[$tmp_amino.'-'];
@@ -446,6 +464,17 @@ class AminoSubjectModel{
 					$nterm_length = strlen($nterm) + 1;
 				}
 				$subject = substr($subject, $nterm_length);
+				
+				if($nterm != $default_value['nterm']){
+					$tmp_amino = array(
+					   'name'=>$nterm,
+					   'count'=>1,
+					   'residue'=>$amino_nterm[$standard_resiude],
+					   'detail'=>$amino_nterm
+					);
+					
+					$this->mOtherAmino[$nterm] = $tmp_amino;
+				}
 			}
 			
 			$tmp_cterm = $aminos[$amino_count-1]; 
@@ -461,7 +490,17 @@ class AminoSubjectModel{
 				}
 				
 				$subject = substr($subject, 0, strlen($subject) - $cterm_length);
-
+                
+				if($cterm != $default_value['cterm']){
+					$tmp_amino = array(
+					   'name'=>$cterm,
+					   'count'=>1,
+					   'residue'=>$amino_cterm[$standard_resiude],
+					   'detail'=>$amino_cterm
+					);
+					
+					$this->mOtherAmino[$cterm] = $tmp_amino;
+				}
 			}
 		}
 		
@@ -469,32 +508,79 @@ class AminoSubjectModel{
 		$this->mCterm = $cterm;
 		$this->mMiddleSubject = $subject;
 	}
-
+    
+	/**
+	 * 分析中间序列
+	 */
     private function analyzeMiddleSubject(){
     	$middle_subject = $this->mMiddleSubject;
 		// 1. 按照普通序列校验
 		$amino_result = $this->amino_to_array($middle_subject);
 
 		if($amino_result['has_error']==false){
+			
 			$amino_fragment = new \Common\Model\AminoFragementModel;
 			$amino_fragment->mIndex = 0;
 			$amino_fragment->mDetail = $amino_result['amino_detail'];
 			
 			array_push($this->mFragments, $amino_fragment);
 		}else{
-			$this->analyzeSpecialFragements($middle_subject);
+			// 	2. 按照特殊序列校验	
+			$fragment_result = $this->analyzeSpecialFragements($middle_subject, $amino_result);
+
+			if($fragment_result['has_error']){
+				// 获取所有片段发生错误
+				$this->mHasError = $fragment_result['has_error'];
+				$this->mMessage = $fragment_result['message'];
+			}else{
+				// 成功获取序列后还需要判断各子序列中有无发生错误，若有则整个序列都标错
+				if(is_array($fragment_result) && count($fragment_result)>0){
+					$has_error = false;
+					$message = '';
+					
+					foreach($fragment_result as $fragment){
+						$detail = $fragment->mDetail;
+						$fragments = $fragment->mFragments;
+						if(is_null($detail) && isset($fragments['has_error'])){
+							$has_error = true;
+							$message = $fragments['message'];
+							break;
+						}
+					}
+					// 若发生错误，则无法继续
+					if($has_error){
+						$this->mHasError = true;
+					    $this->mMessage = $message;
+					    $this->mFragments = null;
+					}else{
+						$this->mHasError = false;
+						$this->mMessage = '成功获取所有片段';
+						$this->mFragments = $fragment_result;
+					}
+				}else{
+					$this->mHasError = true;
+					$this->mMessage = '未能成功获取所有片段';
+					$this->mFragments = null;
+				}
+			}
 		}
     }
 	
-	private function analyzeSpecialFragements($subject){
+	/**
+	 * 用特殊标记分别校验，并获取结果
+	 */
+	private function analyzeSpecialFragements($subject, $amino_result=null){
 		$side_special_data = $this->mChemicalDatas['side_special_data'];
+		$flag_data = null;
 		$special_result = array(
 		   'start_index'=>-1,
 		   'end_index'=>0,
 		   'content'=>'',
 		   'has_flag'=>false,
-		   'flag_name'=>''
+		   'flag_name'=>'',
+		   'flag_data'=>$flag_data
 		);
+
 		$single_index = $this->mBaseIndex['side_special_index']['single'];
 		$full_index = $this->mBaseIndex['side_special_index']['full'];
 		
@@ -514,7 +600,7 @@ class AminoSubjectModel{
 					$special_result['content'] = $single_result['content'];
 				    $special_result['has_flag'] = true;
 				    $special_result['flag_name'] = $single;
-					
+					$special_result['flag_data'] = $side_special;
 				}
 			}
 			
@@ -535,30 +621,119 @@ class AminoSubjectModel{
 					$special_result['content'] = $full_result['content'];
 				    $special_result['has_flag'] = true;
 				    $special_result['flag_name'] = $full;
+					$special_result['flag_data'] = $side_special;
 				}
 			}
 		}
 		
-		//var_dump($special_result);
-		
 		$start_index = $special_result['start_index'];
 		$end_index = $special_result['end_index'];
-		
+		if($start_index==-1){
+			$message = '序列存在无法识别字符:'.$subject;
+
+			if(!is_null($amino_result)){
+				$message = $amino_result['message'];
+			}
+			return array(
+			 'has_error'=>true,
+			 'message'=>$message
+			);
+		}
 		$subject_len = strlen($subject);
 		
 		$subject1 = substr($subject, 0, $start_index);
 		$subject2 = $special_result['content'];
 		$subject3 = substr($subject, $end_index+1);
 		
-		echo 'subjects:<br>';
-		var_dump($subject1);
-		echo '<br>';
-		var_dump($subject2);
-		echo '<br>';
-		var_dump($subject3); 
-		echo '<br>';
+		$fragments = array();
+		$index = 0;
+		$fragment = $this->parse2Fragment($subject1, $index);
+		if(!is_null($fragment)){
+			array_push($fragments, $fragment);
+		}
 		
+		$fragment = $this->parse2Fragment($subject2, $index, true, $special_result['flag_name'], $special_result['flag_data']);
+		if(!is_null($fragment)){
+			array_push($fragments, $fragment);
+		}
+		
+		$fragment = $this->parse2Fragment($subject3, $index);
+		if(!is_null($fragment)){
+			array_push($fragments, $fragment);
+		}
+		
+		return $fragments;
 	}
+
+    /**
+	 * 将subject转化为fragment
+	 * 1、 无flag，按照正常的转化并生成flagment
+	 * 2、 若有，则需要正常赋值
+	 */
+    private function parse2Fragment($subject, &$rIndex, $hasFlag=false, $flagName='', $flagData=null){
+    	$subject_len = strlen($subject);
+		if($subject_len==0){
+			return null;
+		}
+		
+		$subject = remove_str($subject);
+		$amino_result = $this->amino_to_array($subject);
+		$amino_fragment = new \Common\Model\AminoFragementModel;
+		
+		// 当无flag时，表明这个序列按照正常序列分析，flag无
+		if($hasFlag == false){
+			// 当不存在flag时，若无法解析，则需要进一步获取flag 
+			if($amino_result['has_error']){
+				$fragments = $this->analyzeSpecialFragements($subject);
+				
+				if(count($fragments)>0){
+					$amino_fragment = $fragments[0];
+					$amino_fragment->mIndex = $rIndex;
+					$amino_fragment->mChain = '0';
+					$rIndex++;
+				}else{
+					return null;
+				}
+			}else{
+				// 正常解析，则直接赋值
+				$amino_fragment->mIndex = $rIndex;
+				$amino_fragment->mDetail = $amino_result['amino_detail'];
+				$amino_fragment->mChain = '0';
+				$rIndex++;
+			}
+			
+			
+		}else{
+			// 有前一个flag
+			if($amino_result['has_error']){
+				$fragments = $this->analyzeSpecialFragements($subject);
+				if(count($fragments)>0){
+					$amino_fragment->mFragments = $fragments;
+				}else{
+					return null;
+				}
+			}
+			
+			$amino_fragment->mHasFlag = $hasFlag;
+			$amino_fragment->mFlagName = $flagName;
+			$amino_fragment->mFlagData = $flagData;
+			$amino_fragment->mIndex = $rIndex;
+			$amino_fragment->mDetail = $amino_result['amino_detail'];
+			if($flagName=='chainA'){
+				$amino_fragment->mChain='A';
+			}else if($flagName=='chainB'){
+				$amino_fragment->mChain='B';
+			}
+			
+			$rIndex ++;
+		}
+
+		return $amino_fragment;
+    }
+	
+	/**
+	 * 根据分析结果，创建所有氨基酸信息
+	 */
 	public function buildAminoInfo(){
 	
 		$single = '';
@@ -567,11 +742,14 @@ class AminoSubjectModel{
 		$amino_result = $this->getAminoDetail();
 		$single = $amino_result['single'];
 		$full = $amino_result['full'];
-
-
-       $this->mSingle = $single;
-	   $this->mFull = $full;
+        
+		$this->mSingle = $single;
+	    $this->mFull = $full;
 	   
+        if($this->mHasError){
+        	return;
+        }
+		
 	   $this->fixMAP();
 	   $this->getOtherAmino();
 	   $this->buildElements();
@@ -586,38 +764,61 @@ class AminoSubjectModel{
     	$customCys = $this->customCys;
 		
     }
+	
+	/**
+	 * 获取氨基酸详细信息
+	 */
     private function getAminoDetail(){
-    	$single = '';
-		$full = '';
-		
-		$standard_data = $this->mChemicalDatas['standard_data'];
+    	
 		$fragments = $this->mFragments;
-		$fragment_count = count($fragments);
-		if($fragment_count>0){
-			foreach($fragments as $fragment){
-				$amino_datas = $this->getAminoData($fragment, $standard_data);
-				$amino_single = $amino_datas['single'];
-				$amino_full = $amino_datas['full'];
-				
-				if(strlen($single)>0 && strlen($amino_single)>0){
-					$single = $single.'-';
-					$full = $full.'-';
-				}
-				
-				$single = $single . $amino_single;
-				$full = $full .$amino_full;
-				
-			}
+		
+		if(count($fragments)==0){
+			$this->mHasError = true;
+			$this->mMessage = '氨基酸序列无法正常识别，请检查';
+			return;
 		}
+        
+		$single = '';
+		$full = '';
+		$standard_data = $this->mChemicalDatas['standard_data'];
+		
+		foreach($fragments as $fragment){
+			$amino_datas = $this->getSingleFragmentData($fragment);
+			$amino_single = $amino_datas['single'];
+			$amino_full = $amino_datas['full'];
+			
+            /**
+			 * 片段与片段的连接符，默认为-，特殊的可以去除，在side_special表中设置
+			 */
+			if($fragment->mIndex>0){
+				$has_flag = $fragment->mHasFlag;
+				$link = '-';
+				if($has_flag){
+					$flag_data = $fragment->mFlagData;
+				    $side_special_index = $this->mBaseIndex['side_special_index'];
+					$pre_link_index = $side_special_index['pre_link'];
+					
+				    $pre_link = $flag_data[$pre_link_index];
+					
+					if($pre_link==0){
+						$link = '';
+					}
+				}
+			}
+			
+			$single = $single . $link. $amino_single;
+			$full = $full . $link. $amino_full;
+		}
+		
 		
 		$ncTermResult = $this->plusNCTerm($single, $full);
 		$single = $ncTermResult['single'];
 		$full = $ncTermResult['full'];
 		
 		
-		if($this->hasMemo==true){
-			$single = $single . '('. $this->memo. ')';
-			$full = $full . '('. $this->memo. ')';
+		if($this->mHasMemo){
+			$single = $single . '('. $this->mMemo. ')';
+			$full = $full . '('. $this->mMemo. ')';
 		}
 		
 		//是否包含附件显示信息，如指示2硫键、成环类型等
@@ -667,17 +868,101 @@ class AminoSubjectModel{
 		);
     }
 
+    private function getSingleFragmentData($fragment){
+        $single = '';
+		$full = '';
+		
+    	$has_flag = $fragment->mHasFlag;
+		$chain = $fragment->mChain;
 
+		if($has_flag){
+			$amino_detail = $fragment->mDetail;
+			$fragments = $fragment->mFragments;
+			
+			// 需要处理标记嵌套的情况
+			if(is_null($amino_detail) && count($fragments)>0){
+				foreach($fragments as $sub_fragment){
+					
+					$fragment_result = $this->getSingleFragmentData($sub_fragment);
+					if(!is_null($fragment_result)){
+						$single = $single . $fragment_result['single'];
+						$full = $full . $fragment_result['full'];
+					}
+				}
+			}else{
+				$standard_data = $this->mChemicalDatas['standard_data'];
+				$amino_data = $this->getAminoData($fragment->mDetail, $standard_data, $chain);
+				
+				$single = $amino_data['single'];
+				$full = $amino_data['full'];
+			}
+			
+			$flag_data = $fragment->mFlagData;
+			$side_special_index = $this->mBaseIndex['side_special_index'];
+			
+			$single_index = $side_special_index['single'];
+			$full_index = $side_special_index['full'];
+			
+			$flag_single = $flag_data[$single_index];
+			$flag_full = $flag_data[$full_index];
+			$single = $flag_single . '(' . $single . ')';
+			$full = $flag_full . '(' . $full . ')';
+			
+			// 特殊标记需要计算是否要加入氨基酸个数
+			$flag_index = $side_special_index['flag'];
+			$flag = $flag_data[$flag_index];
+			if($flag==1){
+				$standard_data = $this->mChemicalDatas['standard_data'];
+				$standard_index = $this->mBaseIndex['standard_index'];
+				$standard_residue = $standard_index['residue'];
+				
+				$residue = $standard_data[$flag_single][$standard_residue];
+				
+				$this->pushAminoDetail($flag_single, $flag_full, $residue, $standard_data[$flag_single]);
+			}
+			
+		}else{
+			$standard_data = $this->mChemicalDatas['standard_data'];
+			$amino_data = $this->getAminoData($fragment->mDetail, $standard_data, $chain);
+			
+			$single = $amino_data['single'];
+			$full = $amino_data['full'];
+		}
+
+       return array(
+	      'single'=>$single,
+	      'full'=>$full
+	   );
+    }
     
+	/**
+	 * 氨基酸个数计算
+	 */
+	private function pushAminoDetail($single, $full, $residue, $amino){
+		if(isset($this->mAminoDetails[$single])){
+			$this->mAminoDetails[$single]['count'] ++;
+			$this->mElementAminos[$single]['count']++;
+			$this->mPiAminos[$single]['count']++;
+		}else{
+			$amino_detail = array(
+			   'name'=>$full,
+			   'residue'=>$residue,
+			   'count'=>1,
+			   'detail'=>$amino
+			);
+			
+			$this->mAminoDetails[$single] = $amino_detail;
+			$this->mElementAminos[$single] = $amino_detail;
+			$this->mPiAminos[$single] = $amino_detail;
+		}
+	}
 	/**
 	 * 获取氨基酸具体个数数据
 	 */
-    private function getAminoData($fragment, $standard_data){
+    private function getAminoData($amino_details, $standard_data, $chain){
 		$single = '';
 		$full = '';
-
-		$amino_details = $fragment->mDetail;
-		
+	    
 		$standard_index = $this->mBaseIndex['standard_index'];
 		$standard_single = $standard_index['single'];
 		$standard_full = $standard_index['full'];
@@ -687,10 +972,25 @@ class AminoSubjectModel{
 		$standard_base = $standard_index['base'];
 		$standard_flag = $standard_index['flag'];
 		
+		$amino_location = $this->mAminoLocation[$chain];
+		$start_location = 0;
+		//var_dump($chain);
+		if(is_null($amino_location)){
+			$amino_location = array();
+			$this->mAminoLocation[$chain] = $amino_location;
+		}else{
+			$start_location = count($amino_location);
+		}
+		
 		$single_flags = array();
 		$index = 0;
 		foreach($amino_details as $key=>$amino ){
 			$tmp_standard_data = $standard_data[$amino];
+			
+			$amino_location[$start_location + $index] = array(
+			   'single'=>$amino,
+			   'full'=>$tmp_standard_data[$standard_full]
+			);
 			
 			if(is_null($tmp_standard_data)){
 				continue;
@@ -746,25 +1046,10 @@ class AminoSubjectModel{
 			$full = $full . $amino_full;
 			
 			// 具体氨基酸计算
-			$amino = $this->mAminoDetails[$tmp_amino_single];
-			if(is_null($amino)){
-				$amino = array(
-				   'count'=>1,
-				   'full'=>$tmp_amino_full,
-				   'residue'=>$standard_data[$standard_residue]
-				);
-				$this->mAminoDetails[$tmp_amino_single] = $amino;
-			}else{
-				$this->mAminoDetails[$tmp_amino_single]['count'] ++;
-			}
+			$this->pushAminoDetail($tmp_amino_single, $tmp_amino_full, $tmp_standard_data[$standard_residue], $tmp_standard_data);
 		}
-
-		if($fragment->mHasFlag){
-			$flag_name = $fragment->mFlagName;
-			$single = $flag_name.'('.$single.')';
-			$full = $flag_name.'('.$full.')';
-		}
-		
+        
+		$this->mAminoLocation[$chain] = $amino_location;
 		
 		return array(
 		   'single'=>$single,
@@ -774,34 +1059,38 @@ class AminoSubjectModel{
     
 	// 获取元素具体个数
 	private function buildElements(){
-		$standard_data = $this->chemicalDatas['standardData'];
-		$aminoDetails = $this->aminoDetails;
-		$elements = $this->elements;
+		$standard_data = $this->mChemicalDatas['standard_data'];
+		$amino_details = $this->mAminoDetails;
+		$elements = $this->mElements;
 		
-		$elementIndex = $this->elementIndex;
+		$element_index = $this->mBaseIndex['element_index'];
+		$standard_index = $this->mBaseIndex['standard_index'];
 
-		if(count($aminoDetails)==0){
-			foreach($elementIndex as $key=>$index){
+		if(count($amino_details)==0){
+			foreach($element_index as $key=>$index){
 				$elements[$key] = 0;
 			}
 		}else{
-			$_hydrophily = $this->standardIndex['hydrophily'];
-			$_acid = $this->standardIndex['acid'];
-			$_base = $this->standardIndex['base'];
+			$standard_hydrophily = $standard_index['hydrophily'];
+			$standard_acid = $standard_index['acid'];
+			$standard_base = $standard_index['base'];
 			
-			foreach($aminoDetails as $key=>$amino){
-				$standardData = $standard_data[$key];
-				if(!is_null($standardData)){
-					foreach($elementIndex as $key=>$index){
-						$elements[$key] += $standardData[$index] * $amino['count'];
-					}
-					
-					$this->aminoCount += $amino['count'];
-					// 亲水性总值计算
-					$this->hydrophilyCount += $standardData[$_hydrophily];
-					$this->acidCount += $standardData[$_acid];
-					$this->baseCount += $standardData[$_base];
+			foreach($amino_details as $key=>$amino){
+				$tmp_standard_data = $standard_data[$key];
+				if(is_null($tmp_standard_data)){
+					continue;
 				}
+
+				foreach($element_index as $key=>$index){
+					$elements[$key] += $tmp_standard_data[$index] * $amino['count'];
+				}
+				
+				$this->mAminoCount += $amino['count'];
+				// 亲水性总值计算
+				$this->mHydrophilyCount += $tmp_standard_data[$standard_hydrophily];
+				$this->mAcidCount += $tmp_standard_data[$standard_acid] * $amino['count'];
+				$this->mBaseCount += $tmp_standard_data[$standard_base] * $amino['count'];
+
 			}
 		}
 		
@@ -812,20 +1101,20 @@ class AminoSubjectModel{
 			$elements['O'] += 1;
 		}
 		
-		$this->elements = $elements;
+		$this->mElements = $elements;
 	}
 	
 	/**
 	 * 根据二硫键信息及成环类型，修正元素个数
 	 */
 	private function fixElements(){
-		$elements = $this->elements;
-		$sIndex = $this->sIndex;
-		$cycloType = $this->cycloType;
+		$elements = $this->mElements;
+		$sIndex = $this->mSIndex;
+		$cycloType = $this->mCycloType;
 		
 		$sCount = count($sIndex);
 
-		if($sCount>1 && $this->calculateS){
+		if($sCount>1 && $this->mCalculateS){
 			if($elements['H']>=2){
 				$this->elements['H'] -= 2*($sCount/2);
 			}
@@ -834,15 +1123,15 @@ class AminoSubjectModel{
 		if($this->cycloTypeCorect){
 			if($cycloType==0 || $cycloType==1 || $cycloType==2 || $cycloType==3){
 				if($elements['H']>=2){
-					$this->elements['H'] -= 2;
+					$this->mElements['H'] -= 2;
 				}
 				if($elements['O']>0){
-					$this->elements['O'] -= 1;
+					$this->mElements['O'] -= 1;
 				}
 			}
 			if($cycloType==4){
 				if($elements['H']>0){
-					$this->elements['H'] -= 1;
+					$this->mElements['H'] -= 1;
 				}
 			}
 		}
@@ -852,10 +1141,8 @@ class AminoSubjectModel{
 	 * 根据元素表计算分子相关信息
 	 */
     private function buildElementInfos(){
-    	$chemicalDatas = $this->chemicalDatas;
-		$constDatas = $chemicalDatas['aminoConstData'];
-
-    	$elements = $this->elements;
+		$const_datas = $this->mChemicalDatas['amino_const_data'];
+    	$elements = $this->mElements;
 		// 分子式
 		$formula = '';
 		$formulaHtml = '';
@@ -864,42 +1151,44 @@ class AminoSubjectModel{
 		// 精确分子量
 		$em = 0;
 		
-		$_mw = $this->constIndex['mw'];
-		$_em = $this->constIndex['em'];
+		$const_index = $this->mBaseIndex['const_index'];
+		$mw_index = $const_index['mw'];
+		$em_index = $const_index['em'];
 
 		foreach($elements as $key=>$value){
-			if($value>0){
+			if($value>0){ //元素个数大于0
 				$formula = $formula . $key . $value;
 				$formulaHtml = $formulaHtml . $key . '<sub>'.$value.'</sub>';
-				$constData = $constDatas[$key];
-				if(!is_null($constData)){
-					$mw += $constData[$_mw] * $value;
-				    $em += $constData[$_em] * $value;
+				$const_data = $const_datas[$key];
+				if(!is_null($const_data)){
+					$mw += $const_data[$mw_index] * $value;
+				    $em += $const_data[$em_index] * $value;
 				}
 				
 			}
 		}
 		
-		$this->molecularFormula = $formula;
-		$this->formulaHtml = $formulaHtml;
-		$this->mw = sprintf("%.4f",$mw);
-		$this->em = sprintf("%.4f",$em);
+		$this->mFormula = $formula;
+		$this->mFormulaHtml = $formulaHtml;
+		$this->mMw = sprintf("%.4f",$mw);
+		$this->mEm = sprintf("%.4f",$em);
 		
 		$this->fixHydrophilyCount();
-		$this->hydrophily = round($this->hydrophilyCount / $this->aminoCount, 2);
-		$this->hydrophilyResult = $this->getHydrophilyResult($this->hydrophily);
+		$this->mHydrophily = round($this->mHydrophilyCount / $this->mAminoCount, 2);
+		$this->mHydrophilyResult = $this->getHydrophilyResult($this->mHydrophily);
 		
-		$this->solubilityIndex = $this->getSolubilityIndex();
-		$this->solubilityResult = $this->solubilityResults[$this->solubilityIndex];
+		$this->mSolubilityIndex = $this->getSolubilityIndex();
+		$solubility_results = $this->mResultType['solubility_result'];
+		$this->mSolubilityResult = $solubility_results[$this->mSolubilityIndex];
 		
-		$piResult = $this->getPIResult();
-		if(!is_null($piResult)){
-			$_pi = is_numeric($piResult['pi']) ? sprintf('%.2f',$piResult['pi']) : $piResult['pi'];
-			$this->pi = ($_pi===0) ? 0 : $_pi;
-			$this->y = $piResult['y'];
-			$this->pi7 = sprintf('%.2f',$piResult['pi7']);
-			$this->minY = $piResult['minY'];
-			$this->maxY = $piResult['maxY'];
+		$pi_result = $this->getPIResult();
+		if(!is_null($pi_result)){
+			$_pi = is_numeric($pi_result['pi']) ? sprintf('%.2f',$pi_result['pi']) : $pi_result['pi'];
+			$this->mPi = ($_pi===0) ? 0 : $_pi;
+			$this->mY = $pi_result['y'];
+			$this->mPi7 = sprintf('%.2f',$pi_result['pi7']);
+			$this->mMinY = $pi_result['minY'];
+			$this->mMaxY = $pi_result['maxY'];
 		}
 		
     }
@@ -908,37 +1197,37 @@ class AminoSubjectModel{
 	 * 成环类型影响亲水性，需修正
 	 */
 	private function fixHydrophilyCount(){
-		$cycloType = $this->cycloType;
-		$hydrophilyCount = $this->hydrophilyCount;
+		$cycloType = $this->mCycloType;
+		$hydrophily_count = $this->mHydrophilyCount;
 		
 		if($cycloType==0){
-			$hydrophilyCount -= 2;
+			$hydrophily_count -= 2;
 		}else if($cycloType==1){
-			$hydrophilyCount -= 4;
+			$hydrophily_count -= 4;
 		}else if($cycloType==2){
-			$hydrophilyCount -= 3;
+			$hydrophily_count -= 3;
 		}else if($cycloType==3){
-			$hydrophilyCount -= 3;
+			$hydrophily_count -= 3;
 		}
 		
-		$this->hydrophilyCount = $hydrophilyCount;
+		$this->mHydrophilyCount = $hydrophily_count;
 	}
 	/**
 	 * 计算亲水性文字结果
 	 */
 	private function getHydrophilyResult($hydrophily){
-		$hydrophilyResults = $this->hydrophilyResults;
+		$hydrophily_results = $this->mResultType['hydrophily_result'];
 		
-		$hydrophilyResult = $hydrophilyResults[3];
+		$hydrophily_result = $hydrophily_results[3];
 		if($hydrophily>1){
-			$hydrophilyResult = $hydrophilyResults[0];
+			$hydrophily_result = $hydrophily_results[0];
 		}else if($hydrophily>0 && $hydrophily<=1){
-			$hydrophilyResult = $hydrophilyResults[1];
+			$hydrophily_result = $hydrophily_results[1];
 		}else if($hydrophily>-1 && $hydrophily<=0){
-			$hydrophilyResult = $hydrophilyResults[2];
+			$hydrophily_result = $hydrophily_results[2];
 		}
 		
-		return $hydrophilyResult;
+		return $hydrophily_result;
 	}
 	
 	/**
@@ -946,11 +1235,15 @@ class AminoSubjectModel{
 	 */
 	private function getSolubilityIndex(){
 		
-		$y = $this->aminoCount;
-		$acidCount = $this->acidCount;
-		$baseCount = $this->baseCount;
-		$x = $hydrophily = $this->hydrophily;
-		$character1 = $this->original;
+		$y = $this->mAminoCount;
+		$acidCount = $this->mAcidCount;
+		$baseCount = $this->mBaseCount;
+		$x = $hydrophily = $this->mHydrophily;
+		$character1 = $this->mOriginal;
+		
+		$amino_details = $this->mAminoDetails;
+		$standard_data = $this->mChemicalDatas['standard_data'];
+		$standard_index = $this->mBaseIndex['standard_index'];
 		
 		$result_index = -1;
 		
@@ -960,25 +1253,24 @@ class AminoSubjectModel{
 		for($index=0, $len = count($specials); $index<$len; $index++){
 			$pattern = '(' . $specials[$index] .')';
 			$speicalItems = array();
-		    $specialValid = preg_match_all("/$pattern/", $character1, $speicalItems);
+		    $special_valid = preg_match_all("/$pattern/", $character1, $speicalItems);
 	
-			if($specialValid>=2){
+			if($special_valid>=2){
 			    return 0;
 		    }	
 		}
 	
 		// 氨基酸总个数大于等于10
 		if($y >= 10){
-			$specialAminos = ['D','E','N','Q','R','S','T','Y'];
-			$details = $this->aminoDetails;
-			$specialCount = 0;
-			foreach($specialAminos as $amino){
-				if(isset($details[$amino])){
-					$specialCount += $details[$amino]['count'];
+			$special_aminos = ['D','E','N','Q','R','S','T','Y'];
+			$special_count = 0;
+			foreach($special_aminos as $amino){
+				if(isset($amino_details[$amino])){
+					$special_count += $amino_details[$amino]['count'];
 				}
 			}
 	
-			if(($specialCount / $y) > 0.6){
+			if(($special_count / $y) > 0.6){
 	            
 				$abPercent = ($acidCount + $baseCount)/$y;
 				if( $abPercent <= 0.4 ){
@@ -1001,16 +1293,16 @@ class AminoSubjectModel{
 	    	return 4;
 	    }
 		
-		$amino_detail_values = array_values($aminoDetails);
+		$amino_detail_values = array_values($amino_details);
 		
 		if($x>0 && $x<=0.5){
 			// 需要计算连续8个氨基酸的亲水性<=0
 			$acidAminoCount = 0;
 			$firstIndex = 0;
 			
-			$_acid = $this->standardIndex['acid'];
+			$_acid = $standard_index['acid'];
 			for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
-				$standard = $standardData[$amino_detail_values[$index]];
+				$standard = $standard_data[$amino_detail_values[$index]];
 	
 				$acidValue = $standard[$_acid];
 				if($acidValue<=0){
@@ -1038,9 +1330,9 @@ class AminoSubjectModel{
 				// 需要计算连续6个氨基酸的亲水性<=0
 				$acidAminoCount = 0;
 				$firstIndex = 0;
-				$_acid = $this->standardIndex['acid'];
+				$_acid = $standard_index['acid'];
 				for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
-					$standard = $standardData[$amino_detail_values[$index]];
+					$standard = $standard_data[$amino_detail_values[$index]];
 					$acidValue = $standard[$_acid];
 					if($acidValue<=0){
 						$acidAminoCount++;
@@ -1080,15 +1372,15 @@ class AminoSubjectModel{
 	 * 二硫键及成环类型影响PI的计算，需要修正
 	 */
 	private function fixPrePI(){
-		$residue = $this->aminoDetails;
-		$cycloType = $this->cycloType;
+		$residue = $this->mAminoDetails;
+		$cycloType = $this->mCycloType;
 		
-		$ntermData = $this->chemicalDatas['ntermData'];
-		$ctermData = $this->chemicalDatas['ctermData'];
+		$nterm_data = $this->mChemicalDatas['nterm_data'];
+		$cterm_data = $this->mChemicalDatas['cterm_data'];
 		
-		$_ncvalue = $this->standardIndex['ncterm'];
-		$cterm_value = $ctermData[$this->cterm][$_ncvalue];
-		$nterm_value = $ntermData[$this->nterm][$_ncvalue];
+		$_ncvalue = $this->mBaseIndex['standard_index']['ncterm'];
+		$cterm_value = $cterm_data[$this->mCterm][$_ncvalue];
+		$nterm_value = $nterm_data[$this->mNterm][$_ncvalue];
 		
 		$sIndex = $this->sIndex;
 		$sCount = count($sIndex);
@@ -1156,17 +1448,18 @@ class AminoSubjectModel{
 		   'cterm_value'=>$cterm_value
 		);
 	}
+
     /**
 	 * 计算等电点（PI）及 净电荷图例
 	 */
 	private function getPIResult(){
 		$result = null;
 		
-		$fixPiResult = $this->fixPrePI();
-		$residue  = $fixPiResult['residue'];
-		$pkData = $this->chemicalDatas['pkData'];
-	
-		if(!isset($residue) || !isset($pkData)){
+		$fix_pi_result = $this->fixPrePI();
+		$residue  = $fix_pi_result['residue'];
+		$pk_data = $this->mChemicalDatas['pk_data'];
+	    
+		if(!isset($residue) || !isset($pk_data)){
 			return $result;
 		}
 		
@@ -1177,33 +1470,35 @@ class AminoSubjectModel{
 		
 		//保存y和ph的值
 		$piTemp = array(); 
-		$cterm_value = $fixPiResult['cterm_value'];
-		$nterm_value = $fixPiResult['nterm_value'];
+		$cterm_value = $fix_pi_result['cterm_value'];
+		$nterm_value = $fix_pi_result['nterm_value'];
 		
-		$ctermData = null;
-		$ntermData = null;
-		
+		$cterm_data = null;
+		$nterm_data = null;
+
 		//负值的个数
 		$flag0 =0;
 		//正值的个数
 		$flag1 =0;
 		if($cterm_value == 1){
-			$ctermData = $pkData['C-term'];
+			$cterm_data = $pk_data['C-term'];
 			$flag0++;
 		}
 		
 		if($nterm_value == 1){
-			$ntermData = $pkData['N-term'];
+			$nterm_data = $pk_data['N-term'];
 			$flag1++;
 		}
 		$detail = $residue;
 		$count = count($detail);
-	    
-		$_pk = $this->pkIndex['pk'];
-		$_flag = $this->pkIndex['flag'];
-		foreach($detail as $k=>$value){
-			if(isset($pkData[$k])){
-				$tmp = $pkData[$k];
+
+		$pk_index = $this->mBaseIndex['pk_index'];
+		$_pk = $pk_index['pk'];
+		$_flag = $pk_index['flag'];
+		
+		foreach($detail as $name=>$value){
+			if(isset($pk_data[$name])){
+				$tmp = $pk_data[$name];
 				
 				if($tmp[$_flag]==0){
 					$flag0 += $value['count'];
@@ -1221,22 +1516,23 @@ class AminoSubjectModel{
 			$x = $index/100;
 			$y = 0;
 			
-			if(!is_null($ctermData)){
-				$y += $this->calculateSinglePi($x, $ctermData[$_pk], 1, $ctermData[$_flag]);
+			if(!is_null($cterm_data)){
+				$y += $this->calculateSinglePi($x, $cterm_data[$_pk], 1, $cterm_data[$_flag]);
 			}
 			
-			if(!is_null($ntermData)){
-				$y += calculateSinglePi($x, $ntermData[$_pk], 1, $ntermData[$_flag]);
+			if(!is_null($nterm_data)){
+				$y += $this->calculateSinglePi($x, $nterm_data[$_pk], 1, $nterm_data[$_flag]);
 			}
 			
 			if($count==0){
 				continue;
 			}
-			foreach($detail as $k=>$value){
-				if(isset($pkData[$k])){
-					$tmp = $pkData[$k];
+			foreach($detail as $name=>$value){
+				
+				if(isset($pk_data[$name])){
+					$tmp = $pk_data[$name];
+					$y += $this->calculateSinglePi($x, $tmp[$_pk], $value['count'], $tmp[$_flag]);
 					
-					$y += calculateSinglePi($x, $tmp[$_pk], $value['count'], $tmp[$_flag]);
 				}
 			}
 			
@@ -1308,8 +1604,8 @@ class AminoSubjectModel{
 		// cterm和nterm默认需要隐藏的残基
 		$default_nterm = C('default_value')['nterm'];
 		$default_cterm = C('default_value')['cterm'];
-		$nterm = ($this->nterm==$default_nterm) ? '' : $this->nterm;
-		$cterm = $this->cterm==$default_cterm ? '' : $this->cterm;
+		$nterm = ($this->mNterm==$default_nterm) ? '' : $this->mNterm;
+		$cterm = $this->mCterm==$default_cterm ? '' : $this->mCterm;
 		
 		if(!checkNull($nterm) && preg_match('/-$/', $nterm)==0){
 			$nterm = $nterm . '-';
@@ -1332,14 +1628,14 @@ class AminoSubjectModel{
 	 */
 	private function getOtherAmino(){
 		$defaultValue = C('default_value');
-		$ntermData = $this->chemicalDatas['ntermData'];
-		$ctermData = $this->chemicalDatas['ctermData'];
+		$ntermData = $this->mChemicalDatas['nterm_data'];
+		$ctermData = $this->mChemicalDatas['cterm_data'];
 		
-		$nterm = $this->nterm;
-		$cterm = $this->cterm;
+		$nterm = $this->mNterm;
+		$cterm = $this->mCterm;
 		
-		$_full = $this->standardIndex['full'];
-		$_residue = $this->standardIndex['residue'];
+		$_full = $this->mBaseIndex['standard_index']['full'];
+		$_residue = $this->mBaseIndex['standard_index']['residue'];
 		
 		if($defaultValue['nterm']!= $nterm){
 			$_tmp = $ntermData[$nterm];
@@ -1364,7 +1660,7 @@ class AminoSubjectModel{
 	 * 修订MAP相关数字，当序列中存在MAP时，则其他氨基酸数量要增加
 	 */
 	private function fixMAP(){
-		$aminoDetails = $this->aminoDetails;
+		$aminoDetails = $this->mAminoDetails;
 		$amino_keys = array_keys($aminoDetails);
 		$hasMap = false;
 		$number = 0;
@@ -1384,12 +1680,12 @@ class AminoSubjectModel{
 		if($hasMap){
 			foreach($amino_keys as $key){
 				if(strpos($key, 'MAP')==false){
-					$this->aminoDetails[$key]['count'] = $this->aminoDetails[$key]['count'] * $number;
+					$this->mAminoDetails[$key]['count'] = $this->mAminoDetails[$key]['count'] * $number;
 				}
 			}
 
-			$this->cterm = $this->cterm * $number;
-			$this->nterm = $this->nterm * $number;
+			$this->mCterm = $this->mCterm * $number;
+			$this->mNterm = $this->mNterm * $number;
 		}
 	}
 	

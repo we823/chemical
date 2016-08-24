@@ -128,3 +128,25 @@ function reserve_stack($subject, $debug=false) {
 
 	return array('original' => $original, 'content' => $content, 'start_index' => $start_index, 'end_index' => $end_index);
 }
+/**
+ * 在两头去除$default_value
+ * @param $subject mixed 需要处理的字符串
+ * @param $default_value 需要去除的字符 
+ */
+function remove_str($subject, $default_value='-'){
+	$subject = trim($subject);
+	$len = strlen($subject);
+	if($len==0) return $subject;
+	
+	$default_value = trim($default_value);
+	
+	if(preg_match('/^'.$default_value.'/', $subject)>0){
+		$subject = substr($subject, strlen($default_value));
+	}
+	
+	if(preg_match("/$default_value$/", $subject)>0){
+		$subject = substr($subject, 0, $len - strlen($default_value));
+	}
+	
+	return $subject;
+}

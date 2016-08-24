@@ -40,7 +40,8 @@ return array(
 		   'full'	=>'B',
 		   'flag'	=>'C',
 		   //1时有这个标记，需要继续计算。0则表示不需要继续计算
-		   'memo_flag'=>'D' 
+		   'memo_flag'=>'D',
+		   'pre_link'=>'E' 
 		)
 	),
 	'result_type'=>array(

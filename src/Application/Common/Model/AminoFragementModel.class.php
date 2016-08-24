@@ -17,13 +17,21 @@ class AminoFragementModel{
 	 */
 	private $mFlagName='noFlag';
 	/**
+	 * 标记信息
+	 */
+	private $mFlagData;
+	/**
 	 * 序列具体信息
 	 */
 	private $mDetail;
 	/**
+	 * 所在的链上，默认为0，主链
+	 */
+	private $mChain='0';
+	/**
 	 * 子片段内容
 	 */
-	private $mFragements=null;
+	private $mFragments=null;
 	
 	public function __set($name, $value){
 		$this->$name = $value;

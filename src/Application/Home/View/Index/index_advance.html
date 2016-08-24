@@ -84,8 +84,8 @@
 		<script type="text/html" id="result_template">
 			<div class="col-md-12">
 			<ul class="list-unstyled">
-				<li class="col-md-12 col-sm-12"><b>1字符：</b>{{d.character1}}</li>
-				<li class="col-md-12 col-sm-12"><b>多字符：</b>{{d.character3}}</li>
+				<li class="col-md-12 col-sm-12"><b>1字符：</b>{{d.single}}</li>
+				<li class="col-md-12 col-sm-12"><b>多字符：</b>{{d.full}}</li>
 				<li class="col-md-4 col-sm-6"><b>氨基酸个数：</b>{{d.aminoCount}}</li>
 				<li class="col-md-8 col-sm-6"><b>分子式：</b>{{d.formulaHtml}}</li>
 				<li class="col-md-4 col-sm-6"><b>平均分子量(MW)：</b>{{d.mw}}g/mol</li>
@@ -129,7 +129,7 @@
 		<script id="table-body-template" type="text/html">
 			<tr>
 					<td>
-						{{d.full}}
+						{{d.name}}
 					</td>
 					<td>
 						{{d.count}}
