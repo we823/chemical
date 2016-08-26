@@ -1638,7 +1638,7 @@ class AminoSubjectModel{
 			$flag0++;
 		}
 		
-		if($nterm_value > 1){
+		if($nterm_value > 0){
 			$nterm_data = $pk_data['N-term'];
 			$flag1++;
 		}

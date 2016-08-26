@@ -65,6 +65,26 @@ function calculate($, laytpl){
 		$messageShow.removeClass('hidden');
 		return;
 	}
+	
+	// amino与cyclo的选择关系
+	var cycloType = $('#cyclo-type').val(),
+	    cycloError = false;
+	    cycloMessage = '';
+	if(cycloType>-1 && $amino.toLowerCase().indexOf('cyclo')<0){
+		cycloError = true;
+		cycloMessage = '选择了成环类型，但序列中不包含cyclo标记';
+	}
+	
+	if(cycloType==-1 && $amino.toLowerCase().indexOf('cyclo')>-1){
+		cycloError = true;
+		cycloMessage = '列中包含cyclo标记, 请选择成环类型';
+	}
+	
+	if(cycloError){
+		$messageShow.removeClass('alert-info').addClass('alert-danger').html(cycloMessage);
+		$messageShow.removeClass('hidden');
+		return;
+	}
 	var $form = $('#form-data');
 	var url = $form.attr('action');
 	
