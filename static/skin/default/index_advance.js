@@ -26,7 +26,7 @@ define(function(require, exports, module){
        	    if(subject.length==0){
        	    	return;
        	    }
-		    var reg = /([1-9]*[0-9]+\-[1-9]*[0-9])/g;
+		    var reg = /([A|B]?[1-9]*[0-9]+\-[A|B]?[1-9]*[0-9])/g;
 		    var result = subject.match(reg);//reg.exec(subject); //subject.matches(reg);
 
 		    var subjects = subject.split(',');
@@ -100,6 +100,24 @@ function calculate($, laytpl){
 						}
                     }
 
+                    var $pitableBody = $('#table-body-pi');
+					$pitableBody.empty();
+                    
+                    if(result.piOtherAmino){
+                    	for(var amino in result.piOtherAmino){
+						
+							laytpl(tableBodyTemplate).render(result.piOtherAmino[amino], function(h){
+								$pitableBody.append(h);
+							});
+					    }
+                    }
+                    if(result.piAminos){
+                    	for(var detail in result.piAminos){
+							laytpl(tableBodyTemplate).render(result.piAminos[detail], function(h){
+								$pitableBody.append(h);
+							});
+						}
+                    }
 					$messageShow.addClass('hidden');
 					$resultShow.removeClass('hidden');
 					
@@ -125,7 +143,7 @@ function initEcharts(result, echarts){
 	
 	var option = {
 	    title: {
-	        text: '净电荷图('+ result['character3']+')'
+	        text: '净电荷图('+ result['full']+')'
 	    },
 	    smooth:true,
 	    tooltip: {

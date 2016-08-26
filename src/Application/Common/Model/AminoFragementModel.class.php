@@ -40,4 +40,15 @@ class AminoFragementModel{
 	public function __get($name){
 		return $this->$name;
 	}
+	
+	public function toArray(){
+		return array(
+		   'index'=>$this->mIndex,
+		   'has_flag'=>$this->mHasFlag,
+		   'flag_name'=>$this->mFlagName,
+		   'flag_data'=>$this->mFlagData,
+		   'chain'=>$this->mChain,
+		   'detail'=>$this->mDetail
+		);
+	}
 }

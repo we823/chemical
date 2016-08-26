@@ -41,7 +41,9 @@ return array(
 		   'flag'	=>'C',
 		   //1时有这个标记，需要继续计算。0则表示不需要继续计算
 		   'memo_flag'=>'D',
-		   'pre_link'=>'E' 
+		   'pre_link'=>'E',
+		   // pi个数影响
+		   'pi'=>'F'
 		)
 	),
 	'result_type'=>array(

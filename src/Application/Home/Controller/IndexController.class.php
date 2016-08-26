@@ -139,14 +139,24 @@ class IndexController extends Controller {
 		$amino = I('amino');
 		$subject = $amino;
 		
+		$s2 = I('s2');
+		$cyclo_type = I('circle-type', -1);
+		
 		$dataFilename = './data/data_full.xls';
 		$aminoSubject = new \Home\Model\AminoSubjectModel;
 		
+		$aminoSubject->mCustomCys = $s2;
+		$aminoSubject->mCycloType = $cyclo_type;
 		$this->initBaseData($aminoSubject, $dataFilename);
 		$aminoSubject->analyze($subject);
 		$aminoSubject->buildAminoInfo();
 		$result = $aminoSubject->getResult();
-		
+		if(is_null($result)){
+			$result = array(
+			  'hasError'=>true,
+			  'message'=>'系统发生异常，无法计算'
+			);
+		}
 		$this->ajaxReturn($result);
 	}
 	
