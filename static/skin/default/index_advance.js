@@ -170,7 +170,12 @@ function initEcharts(result, echarts){
 	        trigger: 'axis',
 	        formatter: function(params, ticket, callback){
 	        	data = params[0].data;
-	        	return 'pH:'+data[0]+'<br>'+params[0].seriesName+':'+data[1];
+	        	if(data){
+	        		return 'pH:'+data[0]+'<br>'+params[0].seriesName+':'+data[1];
+	        	}else{
+	        		return '数据不正常，无法显示';
+	        	}
+	        	
 	        },
 	        axisPointer: {
 	            animation: false

@@ -32,7 +32,7 @@ class IndexController extends Controller {
     }
 	
 	public function index_advance(){
-		
+
 		$cal = I('cal', 0);
 		if($cal==1){
 			$amino = I('amino');
@@ -132,7 +132,7 @@ class IndexController extends Controller {
 		var_dump($result);
 	}
 	
-	public function result_advance(){
+	public function result_advance3(){
 		header('Access-Control-Allow-Origin:'.$_SERVER['HTTP_ORIGIN']);
 		header('Access-Control-Allow-Credentials:true');
 		
@@ -151,6 +151,35 @@ class IndexController extends Controller {
 		$aminoSubject->analyze($subject);
 		$aminoSubject->buildAminoInfo();
 		$result = $aminoSubject->getResult();
+		if(is_null($result)){
+			$result = array(
+			  'hasError'=>true,
+			  'message'=>'系统发生异常，无法计算'
+			);
+		}
+		$this->ajaxReturn($result);
+	}
+
+    public function result_advance(){
+		header('Access-Control-Allow-Origin:'.$_SERVER['HTTP_ORIGIN']);
+		header('Access-Control-Allow-Credentials:true');
+		
+		$amino = I('amino');
+		$subject = $amino;
+		
+		$s2 = I('s2');
+		$cyclo_type = I('circle-type', -1);
+		
+		$aminoSubjectLogic = D('AminoSubject', 'Logic');
+		$aminoSubjectLogic->init($amino);
+		$aminoSubjectLogic->analyze();
+		
+		$has_error = $aminoSubjectLogic->mAminoSubject->mHasError;
+		if($has_error == false){
+			$aminoSubjectLogic->mAminoSubject->mStatus = 200;
+		}
+		$result = $aminoSubjectLogic->getResult();
+
 		if(is_null($result)){
 			$result = array(
 			  'hasError'=>true,

@@ -150,3 +150,13 @@ function remove_str($subject, $default_value='-'){
 	
 	return $subject;
 }
+/**
+ * 替换特殊字符
+ */
+function replace_special($subject){
+	$subject = str_replace('－', '-', $subject);
+	$subject = str_replace('（', '(', $subject);
+	$subject = str_replace('）', ')', $subject);
+	
+	return $subject;
+}

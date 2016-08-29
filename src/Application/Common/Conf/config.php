@@ -1,6 +1,16 @@
 <?php
 return array(
 	//'配置项'=>'配置值'
+	'DB_TYPE' => 'mysql',
+	'DB_HOST' => '120.24.87.82',
+    'DB_USER' => 'root',
+    'DB_PWD' => 'ZhaowenYuYu2015',
+    'DB_NAME' => 'we823_chemical',
+    'DB_CHARSET' => 'utf8',
+    'DB_PORT' => 3306,
+    'autoconnect' => 1,
+    'webname' => '多肽氨基酸计算',
+    'base'=>__ROOT__,
 	'simple_version'=>'0.0.1',
 	'advance_version'=>'0.0.1',
 	'base_index'=>array(

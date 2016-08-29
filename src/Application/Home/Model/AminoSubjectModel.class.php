@@ -5,6 +5,14 @@ namespace Home\Model;
  * 校验氨基酸序列的对象
  */	
 class AminoSubjectModel{
+	private $mAnalyzeStatus = array(
+	   -1=>'序列暂未分析',
+	   0=>'获取序列备注信息',
+	   1=>'获取序列chain信息',
+	   2=>'分析序列字符串',
+	   200=>'分析结果成功'
+	);
+	private $mStatus = -1;
 	/**
 	 * excel存放的比对的标准数据
 	 */ 
@@ -205,6 +213,17 @@ class AminoSubjectModel{
 	 * 获取序列相关信息
 	 */
 	public function getResult(){
+		$status = $this->mStatus;
+		if($status==200){
+			$this->mHasError = false;
+			$this->mMessage = $this->mAnalyzeStatus[$status];
+		}else{
+			$this->mHasError = true;
+			$message = $this->mMessage ;
+			$message = ' [错误发生在步骤('.$this->mAnalyzeStatus[$status] .')] ' .$message ;
+			$this->mMessage = $message;
+		}
+		
 		return array(
 		   'attachs'=>$this->mAttachs,
 		   'single'=>$this->mSingle,
@@ -1594,8 +1613,8 @@ class AminoSubjectModel{
 		//保存y和ph的值
 		$piTemp = array(); 
 		
-		$ncterm_index = $this->mBaseIndex['ncterm'];
-		
+		$ncterm_index = $this->mBaseIndex['standard_index']['ncterm'];
+
 		$cterms = $this->mCterms;
 		$nterms = $this->mNterms;
 		
@@ -1608,6 +1627,7 @@ class AminoSubjectModel{
 		if(count($nterms)>0){
 			foreach($nterms as $tmp_nterm){
 				$tmp_amino = $other_aminos[$tmp_nterm];
+
 				if(!is_null($tmp_amino)){
 					$nterm_value += $tmp_amino['count'] * $tmp_amino['detail'][$ncterm_index];
 					$nterm_count += $tmp_amino['count'];
@@ -1625,7 +1645,7 @@ class AminoSubjectModel{
 				}
 			}
 		}
-		
+
 		$cterm_data = null;
 		$nterm_data = null;
 
@@ -1635,12 +1655,12 @@ class AminoSubjectModel{
 		$flag1 =0;
 		if($cterm_value > 0){
 			$cterm_data = $pk_data['C-term'];
-			$flag0++;
+			$flag0 += $cterm_value;
 		}
 		
 		if($nterm_value > 0){
 			$nterm_data = $pk_data['N-term'];
-			$flag1++;
+			$flag1 += $nterm_value;
 		}
 		$detail = $pi_aminos;
 		$count = count($detail);
@@ -1724,7 +1744,7 @@ class AminoSubjectModel{
 	    if($flag0>0 && $flag1==0){
 	    	$pi = '此序列为酸性序列，只带负电荷';
 	    }
-	    
+
 		$result['pi'] = $pi;
 		$result['pi7'] = $pi7;
 		$result['maxY'] = $flag1;
@@ -1874,7 +1894,7 @@ class AminoSubjectModel{
 						$amino_location = $amino_locations[$chain];
 						if(is_null($amino_location)){
 							$this->mHasError = true;
-							$this->mMessage = '序列中不存在侧链chain'.$chain;
+							$this->mMessage = '序列中不存在chain'.$chain;
 							return;
 						}
 						
@@ -1961,34 +1981,35 @@ class AminoSubjectModel{
 	 * 计算成环类型的影响
 	 */
 	private function calculateCycloType(){
-		$cyclo_types = $this->mResultType['cyclo_type'];
+		
 		$cyclo_type = $this->mCycloType;
+		
 		if($cyclo_type>-1){
+			
 			if(strpos(strtolower($this->mOriginal), 'cyclo')===false){
 				$this->mHasError = true;
 			    $this->mMessage = '选择了成环类型，但在序列中不存在环标记，请检查';
 				return;
 			}
 			
-			
-			if($cyclo_type<4){
-				array_push($this->mAttachs, $cyclo_types[$cyclo_type]);
-			}
-			
+			$cyclo_types = $this->mResultType['cyclo_type'];
 			$elements = $this->mElements;
+			
+			$cyclo_error = false;
+			$cyclo_message = '';
 			if($cyclo_type==0){
-				if(isset($elements['H'])){
-					$this->mElements['H'] -=2;
-				}
+				$cyclo_message = '已选择主链成环，但序列不满足条件，';
 				
-				if(isset($elements['O'])){
-					$this->mElements['O'] -= 1;
-				}
-				
+				$pi_other_aminos = $this->mPiOtherAminos;
 				$nterms = $this->mNterms;
 				if(count($nterms)>0){
 					foreach($nterms as $nterm){
-						$pi_other_aminos = $this->mPiOtherAminos;
+						// 主链成环的nterm必须为H-
+						if($nterm!=$this->mDefaultValue['nterm']){
+							$cyclo_error = true;
+							$cyclo_message = $cyclo_message . '原因：nterm必须为H';
+							break;
+						}
 						foreach($pi_other_aminos as $pi_other_amino){
 							if($nterm == $pi_other_amino['name']){
 								$this->mPiOtherAminos[$nterm]['count'] -= 1;
@@ -2001,7 +2022,12 @@ class AminoSubjectModel{
 				$cterms = $this->mCterms;
 				if(count($cterms)>0){
 					foreach($cterms as $cterm){
-						$pi_other_aminos = $this->mPiOtherAminos;
+						// 主链成环的cterm必须为OH
+						if($cterm != $this->mDefaultValue['cterm']){
+							$cyclo_error = true;
+							$cyclo_message = $cyclo_message . '原因：cterm必须为OH';
+							break;
+						}
 						foreach($pi_other_aminos as $pi_other_amino){
 							if($cterm == $pi_other_amino['name']){
 								$this->mPiOtherAminos[$cterm]['count'] -= 1;
@@ -2009,90 +2035,333 @@ class AminoSubjectModel{
 							}
 						}
 					}
+				}
+				
+				// 主链成环的cyclo必须在序列的两端。
+				$middle_subjects = $this->mMiddleSubjects;
+				if(count($middle_subjects)>0){
+					foreach($middle_subjects as $middle_subject){
+						$subject_result = stack($middle_subject);
+						$start_index = $subject_result['start_index'];
+						$end_index = $subject_result['end_index'];
+						if(($start_index - 5)!=0){ // cyclo标记之前还有内容
+							$cyclo_error = true;
+						    $cyclo_message = $cyclo_message . ' 原因：cyclo标记前有其他序列';
+							break;
+						}
+						
+						if($end_index != (strlen($middle_subject)-1)){
+							$cyclo_error = true;
+							$cyclo_message = $cyclo_message . ' 原因：cyclo标记后有其他序列';
+							break;
+						}
+					}
+				}
+				
+				array_push($this->mAttachs, $cyclo_types[$cyclo_type]);
+				if(isset($elements['H'])){
+					$this->mElements['H'] -=2;
+				}
+				
+				if(isset($elements['O'])){
+					$this->mElements['O'] -= 1;
 				}
 				
 				$this->mHydrophilyCount -= 2;
+				
 			}else if($cyclo_type == 1){
-				if(isset($elements['H'])){
-					$this->mElements['H'] -=2;
+				$cyclo_message = '已选择侧链成环，但序列不满足条件，';
+				
+				$cyclo_fragments = $this->mCycloFragments;
+				if(count($cyclo_fragments)==0){
+					$cyclo_error = true;
+					$cyclo_message = '原因： 不存在成环序列';
 				}
 				
-				if(isset($elements['O'])){
-					$this->mElements['O'] -= 1;
-				}
-				
-				$pi_aminos = $this->mPiAminos;
-				if(isset($pi_aminos['D'])){
-					$this->mPiAminos['D']['count'] -= 1;
-				}
-				
-				if(isset($pi_aminos['K'])){
-					$this->mPiAminos['K']['count'] -= 1;
-				}
-				
-				$this->mHydrophilyCount -= 4;
-			}else if($cyclo_type == 2){
-				if(isset($elements['H'])){
-					$this->mElements['H'] -=2;
-				}
-				
-				if(isset($elements['O'])){
-					$this->mElements['O'] -= 1;
-				}
-				
-				$pi_aminos = $this->mPiAminos;
-				if(isset($pi_aminos['D'])){
-					$this->mPiAminos['D']['count'] -= 1;
-				}
-				
-				$nterms = $this->mNterms;
-				if(count($nterms)>0){
-					foreach($nterms as $nterm){
-						$pi_other_aminos = $this->mPiOtherAminos;
-						foreach($pi_other_aminos as $pi_other_amino){
-							if($nterm == $pi_other_amino['name']){
-								$this->mPiOtherAminos[$nterm]['count'] -= 1;
-							    break;
+				if(!$cyclo_error){
+					$pi_aminos = $this->mPiAminos;
+					foreach($cyclo_fragments as $chain => $cyclo_fragment){
+						if(is_array($cyclo_fragment) && count($cyclo_fragment)==0) continue;
+						
+						$standard_data = $this->mChemicalDatas['standard_data'];
+						$acid_index = $this->mBaseIndex['standard_index']['acid'];
+						$base_index = $this->mBaseIndex['standard_index']['base'];
+						foreach($cyclo_fragment as $fragment){
+							$detail = $fragment['detail'];
+							if(is_null($detail) || count($detail)==0){
+								$cyclo_error = true;
+								$cyclo_message = $cyclo_message.'原因： 序列无法直接计算氨基酸基团的酸碱性';
+								break;
 							}
 							
-						}
-					}
-				}
-				
-				$this->mHydrophilyCount -= 3;
-			}else if($cyclo_type == 3){
-				if(isset($elements['H'])){
-					$this->mElements['H'] -=2;
-				}
-				
-				if(isset($elements['O'])){
-					$this->mElements['O'] -= 1;
-				}
-				
-				$pi_aminos = $this->mPiAminos;
-				$cterms = $this->mCterms;
-				if(count($cterms)>0){
-					foreach($cterms as $cterm){
-						$pi_other_aminos = $this->mPiOtherAminos;
-						foreach($pi_other_aminos as $pi_other_amino){
-							if($cterm == $pi_other_amino['name']){
-								$this->mPiOtherAminos[$cterm]['count'] -= 1;
-							    break;
+							if(count($detail)==1){
+								$cyclo_error = true;
+								$cyclo_message = $cyclo_message.'原因： 序列只有1个氨基酸基团';
+								break;
+							}
+							
+							$amino_first = $detail[0];
+							$amino_last = $detail[count($detail)-1];
+							
+							$amino_data_first = $standard_data[$amino_first];
+							$amino_data_last = $standard_data[$amino_last];
+							
+							$amino_data_first_acid = $amino_data_first[$acid_index];
+							$amino_data_first_base = $amino_data_first[$base_index];
+							
+							$amino_data_last_acid = $amino_data_last[$acid_index];
+							$amino_data_last_base = $amino_data_last[$base_index];
+							
+							// 前后氨基酸必须为一碱一酸
+							if($amino_data_first_acid==$amino_data_last_acid || $amino_data_first_base==$amino_data_last_base){
+								$cyclo_error = true;
+								$cyclo_message = $cyclo_message . '原因：氨基酸基团的酸碱性不正确';
+								break;
+							}
+							
+							if(isset($pi_aminos[$amino_first])){
+								$this->mPiAminos[$amino_first]['count'] -= 1;
+							}
+							
+							if(isset($pi_aminos[$amino_last])){
+								$this->mPiAminos[$amino_last]['count'] -= 1;
+							}
+							
+							if($chain=='0'){
+								array_push($this->mAttachs, $cyclo_types[$cyclo_type]);
+							}else{
+								array_push($this->mAttachs, 'chain' .$chain. ':' .$cyclo_types[$cyclo_type]);
 							}
 						}
 					}
 				}
 				
-				if(isset($pi_aminos['K'])){
-					$this->mPiAminos['K']['count'] -= 1;
+				if($cyclo_error == false){
+					if(isset($elements['H'])){
+						$this->mElements['H'] -=2;
+					}
+					
+					if(isset($elements['O'])){
+						$this->mElements['O'] -= 1;
+					}
+					
+					$this->mHydrophilyCount -= 4;
 				}
 				
-				$this->mHydrophilyCount -= 3;
+			}else if($cyclo_type == 2){
+				$cyclo_message = '已选择主（N端）侧（C端）成环，但序列不满足条件，';
+				
+				// cyclo必须在序列的左端。
+				$middle_subjects = $this->mMiddleSubjects;
+				if(count($middle_subjects)>0){
+					foreach($middle_subjects as $middle_subject){
+						$subject_result = stack($middle_subject);
+						$start_index = $subject_result['start_index'];
+						$end_index = $subject_result['end_index'];
+						if(($start_index - 5)!=0){ // cyclo标记之前还有内容
+							$cyclo_error = true;
+						    $cyclo_message = $cyclo_message . ' 原因：cyclo标记前有其他序列';
+							break;
+						}
+					}
+				}
+				
+				if(!$cyclo_error){
+					$pi_aminos = $this->mPiAminos;
+					foreach($cyclo_fragments as $chain => $cyclo_fragment){
+						if(is_array($cyclo_fragment) && count($cyclo_fragment)==0) continue;
+						
+						$standard_data = $this->mChemicalDatas['standard_data'];
+						$acid_index = $this->mBaseIndex['standard_index']['acid'];
+						$base_index = $this->mBaseIndex['standard_index']['base'];
+						foreach($cyclo_fragment as $fragment){
+							$detail = $fragment['detail'];
+							if(is_null($detail) || count($detail)==0){
+								$cyclo_error = true;
+								$cyclo_message = $cyclo_message.'原因： 序列无法直接计算氨基酸基团的酸碱性';
+								break;
+							}
+							
+							$amino_last = $detail[count($detail)-1];
+							
+							$amino_data_last = $standard_data[$amino_last];
+							
+							$amino_data_last_acid = $amino_data_last[$acid_index];
+							$amino_data_last_base = $amino_data_last[$base_index];
+							
+							// 右氨基酸必须为酸性氨基酸
+							if($amino_data_last_acid == 0){
+								$cyclo_error = true;
+								$cyclo_message = $cyclo_message . '原因：最后一个氨基酸基团必须为酸性基团';
+								break;
+							}
+							
+							if(isset($pi_aminos[$amino_last])){
+								$this->mPiAminos[$amino_last]['count'] -= 1;
+							}
+							
+							if($chain=='0'){
+								array_push($this->mAttachs, $cyclo_types[$cyclo_type]);
+							}else{
+								array_push($this->mAttachs, 'chain' .$chain. ':' .$cyclo_types[$cyclo_type]);
+							}
+						}
+					}
+				}
+
+				if(!$cyclo_error){
+					if(isset($elements['H'])){
+						$this->mElements['H'] -=2;
+					}
+					
+					if(isset($elements['O'])){
+						$this->mElements['O'] -= 1;
+					}
+
+					$nterms = $this->mNterms;
+					if(count($nterms)>0){
+						foreach($nterms as $nterm){
+							$pi_other_aminos = $this->mPiOtherAminos;
+							foreach($pi_other_aminos as $pi_other_amino){
+								if($nterm == $pi_other_amino['name']){
+									$this->mPiOtherAminos[$nterm]['count'] -= 1;
+								    break;
+								}
+								
+							}
+						}
+					}
+					
+					$this->mHydrophilyCount -= 3;
+				}
+				
+			}else if($cyclo_type == 3){
+				$cyclo_message = '已选择侧（N端）主（C端）成环，但序列不满足条件，';
+				
+				// cyclo必须在序列的右端。
+				$middle_subjects = $this->mMiddleSubjects;
+				if(count($middle_subjects)>0){
+					foreach($middle_subjects as $middle_subject){
+						$subject_result = stack($middle_subject);
+						$start_index = $subject_result['start_index'];
+						$end_index = $subject_result['end_index'];
+						
+						if($end_index != (strlen($middle_subject)-1)){
+							$cyclo_error = true;
+							$cyclo_message = $cyclo_message . ' 原因：cyclo标记后有其他序列';
+							break;
+						}
+					}
+				}
+				
+				if(!$cyclo_error){
+					$pi_aminos = $this->mPiAminos;
+					foreach($cyclo_fragments as $chain => $cyclo_fragment){
+						if(is_array($cyclo_fragment) && count($cyclo_fragment)==0) continue;
+						
+						$standard_data = $this->mChemicalDatas['standard_data'];
+						$acid_index = $this->mBaseIndex['standard_index']['acid'];
+						$base_index = $this->mBaseIndex['standard_index']['base'];
+						foreach($cyclo_fragment as $fragment){
+							$detail = $fragment['detail'];
+							if(is_null($detail) || count($detail)==0){
+								$cyclo_error = true;
+								$cyclo_message = $cyclo_message.'原因： 序列无法直接计算氨基酸基团的酸碱性';
+								break;
+							}
+							
+							
+							$amino_first = $detail[0];
+							
+							$amino_data_first = $standard_data[$amino_first];
+							
+							$amino_data_first_acid = $amino_data_first[$acid_index];
+							$amino_data_first_base = $amino_data_first[$base_index];
+							
+							
+							// 前后氨基酸必须为一碱一酸
+							if($amino_data_first_base == 0){
+								$cyclo_error = true;
+								$cyclo_message = $cyclo_message . '原因：第一个氨基酸基团必须为碱性基团';
+								break;
+							}
+							
+							if(isset($pi_aminos[$amino_first])){
+								$this->mPiAminos[$amino_first]['count'] -= 1;
+							}
+							
+							
+							if($chain=='0'){
+								array_push($this->mAttachs, $cyclo_types[$cyclo_type]);
+							}else{
+								array_push($this->mAttachs, 'chain' .$chain. ':' .$cyclo_types[$cyclo_type]);
+							}
+						}
+					}
+				}
+                
+				if(!$cyclo_error){
+					if(isset($elements['H'])){
+						$this->mElements['H'] -=2;
+					}
+					
+					if(isset($elements['O'])){
+						$this->mElements['O'] -= 1;
+					}
+					
+					$pi_aminos = $this->mPiAminos;
+					$cterms = $this->mCterms;
+					if(count($cterms)>0){
+						foreach($cterms as $cterm){
+							$pi_other_aminos = $this->mPiOtherAminos;
+							foreach($pi_other_aminos as $pi_other_amino){
+								if($cterm == $pi_other_amino['name']){
+									$this->mPiOtherAminos[$cterm]['count'] -= 1;
+								    break;
+								}
+							}
+						}
+					}
+					
+					$this->mHydrophilyCount -= 3;
+				}
+				
 			}else if($cyclo_type == 4){
+				$cyclo_message = '已选择硫醚成环，但序列不满足条件，';
+				$pi_aminos = $this->mPiAminos;
+				
+				$exist_amino = '';
+				$cyclo_fragments = $this->mCycloFragments;
+				foreach($cyclo_fragments as $chain => $cyclo_fragment){
+					
+					if(is_array($cyclo_fragment) && count($cyclo_fragment)==0) continue;
+				
+					foreach($cyclo_fragment as $fragment){
+						$detail = $fragment['detail'];
+						foreach($detail as $amino){
+							if($amino=='C' || $amino=='Mpr'){
+								$exist_amino = $amino;
+							}
+						}
+					}
+				}
+                
+				if(strlen($exist_amino)==0){
+					$cyclo_error = true;
+					$cyclo_message = $cyclo_message . '原因：环中不包含Cys或Mpr氨基酸基团';
+				}else{
+					if(isset($pi_aminos[$exist_amino])){
+						$this->mPiAminos[$exist_amino]['count'] -= 1;
+					}
+				}
+				
 				if(isset($elements['H'])){
 					$this->mElements['H'] -=2;
 				}
 			}
+			
+			$this->mHasError = $cyclo_error;
+			$this->mMessage = $cyclo_message;
 			
 		}
 	}
