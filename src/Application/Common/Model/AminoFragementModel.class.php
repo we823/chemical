@@ -5,6 +5,10 @@ namespace Common\Model;
  */
 class AminoFragementModel{
 	/**
+	 * 上一级片段序号
+	 */
+	private $mParentIndex;
+	/**
 	 * 片段序号
 	 */
 	private $mIndex;

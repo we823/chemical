@@ -123,14 +123,13 @@ function calculate($, laytpl){
                     var $pitableBody = $('#table-body-pi');
 					$pitableBody.empty();
                     
-                    if(result.piOtherAmino){
-                    	for(var amino in result.piOtherAmino){
-						
-							laytpl(tableBodyTemplate).render(result.piOtherAmino[amino], function(h){
-								$pitableBody.append(h);
-							});
-					    }
-                    }
+                    laytpl(tableBodyTemplate).render({'name':'N-Term', 'count':result.ntermValue, 'residue':'-'}, function(h){
+						$pitableBody.append(h);
+					});
+					laytpl(tableBodyTemplate).render({'name':'C-Term', 'count':result.ctermValue, 'residue':'-'}, function(h){
+						$pitableBody.append(h);
+					});
+					
                     if(result.piAminos){
                     	for(var detail in result.piAminos){
 							laytpl(tableBodyTemplate).render(result.piAminos[detail], function(h){

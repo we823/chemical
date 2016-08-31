@@ -162,8 +162,9 @@ class AminoSubjectModel{
 	 * 中间有效序列，去除nterm和cterm
 	 */
 	private $mMiddleSubject;
-	private $mCterm ;
+	private $mCterm;
 	private $mNterm;
+	
 	
 	/**
 	 * 链的基本信息
@@ -174,6 +175,16 @@ class AminoSubjectModel{
 	private $mMiddleSubjects = array();
 	private $mCterms = array();
 	private $mNterms = array();
+	/**
+	 * pi相关nterm值
+	 */
+	private $mNtermValue = 0;
+	/**
+	 * pi相关的cterm值
+	 */
+	private $mCtermValue = 0;
+	private $mNtermCount = 0;
+	private $mCtermCount = 0;
 	/**
 	 * 完整序列后需要显示的附加信息
 	 */
@@ -251,6 +262,10 @@ class AminoSubjectModel{
 		   'piOtherAmino'=>$this->mPiOtherAminos,
 		   'nterms'=>$this->mNterms,
 		   'cterms'=>$this->mCterms,
+		   'ntermCount'=>$this->mNtermCount,
+		   'ctermCount'=>$this->mCtermCount,
+		   'ntermValue'=>$this->mNtermValue,
+		   'ctermValue'=>$this->mCtermValue,
 		   'hydrophily'=>$this->mHydrophily,
 		   'hydrophilyResult'=>$this->mHydrophilyResult,
 		   'solubilityResult'=>$this->mSolubilityResult,

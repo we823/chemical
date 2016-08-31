@@ -11,8 +11,13 @@ return array(
     'autoconnect' => 1,
     'webname' => '多肽氨基酸计算',
     'base'=>__ROOT__,
+    'nterm_flag'=>'2,4',
+    'cterm_flag'=>'3',
 	'simple_version'=>'0.0.1',
 	'advance_version'=>'0.0.1',
+	'element_index'=>array(
+		   'C','H','N','O','S','P','Cl'
+	),
 	'base_index'=>array(
 		'element_index'		=>array(
 		   'C'=>'F',
