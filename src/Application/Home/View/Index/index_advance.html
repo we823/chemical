@@ -52,7 +52,7 @@
 							
 							<label class="col-md-2 control-label no-padding-right">成环类型&nbsp;</label>
 							<div class="col-md-4 no-padding-left">
-								<select id="cyclo-type" name="circle-type" class="form-control">
+								<select id="cyclo-type" name="cyclo-type" class="form-control">
 									<option value="-1">未成环</option>
 									<option value="0">主链成环</option>
 									<option value="1">侧链成环</option>
@@ -60,6 +60,27 @@
 									<option value="3">侧（N端）主（C端）成环</option>
 									<option value="4">硫醚成环</option>
 								</select>
+								<div id="cyclo-type-info" style="display: none;">
+									chainA:
+									<select id="cyclo-type-A" name="cyclo-type-A" class="form-control">
+										<option value="-1">未成环</option>
+										<option value="0">主链成环</option>
+										<option value="1">侧链成环</option>
+										<option value="2">主（N端）侧（C端）成环</option>
+										<option value="3">侧（N端）主（C端）成环</option>
+										<option value="4">硫醚成环</option>
+									</select>
+									
+									chainB:
+									<select id="cyclo-type-B" name="cyclo-type-B" class="form-control">
+										<option value="-1">未成环</option>
+										<option value="0">主链成环</option>
+										<option value="1">侧链成环</option>
+										<option value="2">主（N端）侧（C端）成环</option>
+										<option value="3">侧（N端）主（C端）成环</option>
+										<option value="4">硫醚成环</option>
+									</select>
+								</div>
 							</div>
 							
 						</div>
@@ -141,7 +162,7 @@
                 <tfoot>
                 	<tr>
                 		<td>氨基酸总数</td>
-                		<td>{{d.aminoCount}}</td>
+                		<td>{{d.piAminoCount}}</td>
                 		<td></td>
                 	</tr>
                 	

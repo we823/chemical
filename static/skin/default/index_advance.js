@@ -15,6 +15,20 @@ define(function(require, exports, module){
 			
 			$('#calculate-button').click();
 		}
+	    
+	    $('#amino').on('change', function(){
+	    	var $amino = $('#amino').val();
+	    	if($amino.indexOf('chain')>-1){
+	    		$('#cyclo-type-info').show();
+	    		$('#cyclo-type').hide();
+	    		$('#cyclo-type').val(-1);
+	    	}else{
+	    		$('#cyclo-type-info').hide();
+	    		$('#cyclo-type-A').val(-1);
+	    		$('#cyclo-type-B').val(-1);
+	    		$('#cyclo-type').show();
+	    	}
+	    });
 	};
 	
 	exports.sCheck = function(){
@@ -26,8 +40,9 @@ define(function(require, exports, module){
        	    if(subject.length==0){
        	    	return;
        	    }
+       	    subject = subject.toUpperCase();
 		    var reg = /([A|B]?[1-9]*[0-9]+\-[A|B]?[1-9]*[0-9])/g;
-		    var result = subject.match(reg);//reg.exec(subject); //subject.matches(reg);
+		    var result = subject.match(reg);
 
 		    var subjects = subject.split(',');
 		    var newSubjects = new Array();
@@ -41,7 +56,7 @@ define(function(require, exports, module){
 			    newSubjectsLength = newSubjects.length;
 	
 			if(resultLength < newSubjectsLength){
-				$messageShow.removeClass('alert-info').removeClass('hidden').addClass('alert-danger').html('输入的二硫键修饰格式不对，请输入类似3-8,9-15');
+				$messageShow.removeClass('alert-info').removeClass('hidden').addClass('alert-danger').html('输入的二硫键修饰格式不对，请输入类似3-8,9-15; 字母只能输入A或B');
 			}
 		
        });	
@@ -68,16 +83,39 @@ function calculate($, laytpl){
 	
 	// amino与cyclo的选择关系
 	var cycloType = $('#cyclo-type').val(),
+	    cycloTypeA = $('#cyclo-type-A').val(),
+	    cycloTypeB = $('#cyclo-type-B').val(),
 	    cycloError = false;
 	    cycloMessage = '';
-	if(cycloType>-1 && $amino.toLowerCase().indexOf('cyclo')<0){
+	var tmp_type = -1;
+	if(cycloType>-1 || cycloTypeA>-1 || cycloTypeB>-1){
+		tmp_type = 0;
+	}
+	if(tmp_type>-1 && $amino.toLowerCase().indexOf('cyclo')<0){
 		cycloError = true;
 		cycloMessage = '选择了成环类型，但序列中不包含cyclo标记';
 	}
 	
-	if(cycloType==-1 && $amino.toLowerCase().indexOf('cyclo')>-1){
+	if(tmp_type==-1 && $amino.toLowerCase().indexOf('cyclo')>-1){
 		cycloError = true;
-		cycloMessage = '列中包含cyclo标记, 请选择成环类型';
+		cycloMessage = '序列中包含cyclo标记, 请选择成环类型';
+	}
+	
+	if($amino.indexOf('chain')>-1){
+		var reg = /(cyclo)/gi;
+		var result = $amino.match(reg);
+		if(result){
+			var len = result.length;
+			if(cycloTypeA>-1 && cycloTypeB>-1){
+				tmp_type = 2;
+			}
+			if(len>1){
+				if(tmp_type!=2){
+					cycloError = true;
+		            cycloMessage = '序列中包含多个cyclo标记, 请分别选择成环类型';
+				}
+			}
+		}
 	}
 	
 	if(cycloError){

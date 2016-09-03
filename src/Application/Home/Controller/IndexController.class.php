@@ -168,16 +168,18 @@ class IndexController extends Controller {
 		$subject = $amino;
 		
 		$s2 = I('s2');
-		$cyclo_type = I('circle-type', -1);
+		$cyclo_type = I('cyclo-type', -1);
+		$cyclo_type_a = I('cyclo-type-A', -1);
+		$cyclo_type_b = I('cyclo-type-B', -1);
 		
 		$aminoSubjectLogic = D('AminoSubject', 'Logic');
 		$aminoSubjectLogic->init($amino);
+		$aminoSubjectLogic->mCycloType = $cyclo_type;
+		$aminoSubjectLogic->mCycloTypeA = $cyclo_type_a;
+		$aminoSubjectLogic->mCycloTypeB = $cyclo_type_b;
+		$aminoSubjectLogic->mCustomCys = $s2;
 		$aminoSubjectLogic->analyze();
-		
-		$has_error = $aminoSubjectLogic->mAminoSubject->mHasError;
-		if($has_error == false){
-			$aminoSubjectLogic->mAminoSubject->mStatus = 200;
-		}
+
 		$result = $aminoSubjectLogic->getResult();
 
 		if(is_null($result)){

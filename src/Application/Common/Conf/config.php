@@ -16,7 +16,7 @@ return array(
 	'simple_version'=>'0.0.1',
 	'advance_version'=>'0.0.1',
 	'element_index'=>array(
-		   'C','H','N','O','S','P','Cl'
+		 'C','H','N','O','S','P','Cl','Se'
 	),
 	'base_index'=>array(
 		'element_index'		=>array(

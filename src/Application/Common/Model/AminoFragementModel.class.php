@@ -46,13 +46,33 @@ class AminoFragementModel{
 	}
 	
 	public function toArray(){
+		$detail = $this->mDetail;
+		if(is_null($detail)){
+			$fragments = $this->mFragments;
+			if(count($fragments)>0){
+				$detail = array();
+				foreach($fragments as $fragment){
+					if(!is_null($fragment->mDetail)){
+						$detail = array_merge($detail, $fragment->mDetail);
+					}else{
+						$has_flag = $fragment->mHasFlag;
+						if($has_flag){
+							$flag_data = $fragment->mFlagData;
+							if($flag_data['flag']==1){
+								array_push($detail, $flag_data['single']);
+							}
+						}
+					}
+				}
+			}
+		}
 		return array(
 		   'index'=>$this->mIndex,
 		   'has_flag'=>$this->mHasFlag,
 		   'flag_name'=>$this->mFlagName,
 		   'flag_data'=>$this->mFlagData,
 		   'chain'=>$this->mChain,
-		   'detail'=>$this->mDetail
+		   'detail'=>$detail
 		);
 	}
 }

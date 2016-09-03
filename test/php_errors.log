@@ -1,4 +1,0 @@
-[07-Aug-2016 15:25:43 PRC] PHP Fatal error:  Call to undefined function pop() in D:\php-develop\projects\chemical\test\stack.php on line 7
-[07-Aug-2016 15:26:26 PRC] PHP Fatal error:  Call to undefined function pop() in D:\php-develop\projects\chemical\test\stack.php on line 7
-[07-Aug-2016 15:26:35 PRC] PHP Fatal error:  Call to a member function pop() on array in D:\php-develop\projects\chemical\test\stack.php on line 7
-[18-Aug-2016 11:26:49 PRC] PHP Warning:  preg_match_all(): Unknown modifier 'g' in D:\php-develop\projects\chemical\test\reg4.php on line 6
