@@ -18,49 +18,6 @@ return array(
 	'element_index'=>array(
 		 'C','H','N','O','S','P','Cl','Se'
 	),
-	'base_index'=>array(
-		'element_index'		=>array(
-		   'C'=>'F',
-		   'H'=>'G',
-		   'N'=>'H',
-		   'O'=>'I',
-		   'S'=>'J',
-		   'P'=>'K',
-		   'Cl'=>'L'
-		),
-		'standard_index'	=>array(
-		  'single'		=>'A',
-		  'full'		=>'B',
-		  'residue'		=>'E',
-		  'solubility'	=>'M',
-		  'hydrophily'	=>'N',
-		  'ncterm'		=>'P',
-		  'acid'		=>'Q',
-		  'base'		=>'R',
-		  'flag'		=>'S'
-		),
-		'pk_index'			=>array(
-		   'single'	=>'A',
-		   'full'	=>'B',
-		   'pk'		=>'C',
-		   'flag'	=>'D'
-		),
-		'const_index'=>array(
-		   'name'	=>'A',
-		   'mw'		=>'B',
-		   'em'		=>'C'
-		),
-		'side_special_index'=>array(
-		   'single'	=>'A',
-		   'full'	=>'B',
-		   'flag'	=>'C',
-		   //1时有这个标记，需要继续计算。0则表示不需要继续计算
-		   'memo_flag'=>'D',
-		   'pre_link'=>'E',
-		   // pi个数影响
-		   'pi'=>'F'
-		)
-	),
 	'result_type'=>array(
 		'cyclo_type'=>array(
 		  0=>'main chain cyclo',

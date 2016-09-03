@@ -7,5 +7,5 @@ seajs.config({
 		'bootstrap': 'asset/bootstrap/3.3.6/js/bootstrap.min'
 	},
 	preload: ['jquery'],
-	map: [[/^(.*\.(?:css|js))(.*)$/i, '$1?v=20160819']]
+	map: [[/^(.*\.(?:css|js))(.*)$/i, '$1?v=20160903']]
 });
