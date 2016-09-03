@@ -10,15 +10,18 @@
        1表示为普通氨基酸，
        2为nterm，
        3为cterm,
-       4为无N-term且需要增加1个Lys，
+       4为仅在Nterm时需要增加1个Lys，Cterm时增加1个Glu
        5为需要增加1个C-term,
-       6为需要增加一个pS，在C端则C-term为0，在Glu或Asp侧链则Glu或Asp减1。
+       6为需要增加一个N-term,且不出现在N-term上
+       7(双羧基）为只在N-term上无N-term，需要增加一个Glu；
+       8（双氨基）为只在C-term上，需要增加1个Lys
   (e) term_value: 表明当此氨基酸对应flag=2、flag=3时term的值
   (f) cyclo_enable: 
-       -1： 酸性氨基酸，可参与成环
+       -1： 含侧链羧基，可参与成环
        0： 无法成环
-       1: 碱性氨基酸，可参与成环
-       2： 硫醚成环及二硫键成对
+       1: 含侧链氨基，可参与成环
+       2： 含侧链巯基可以形成二硫键和硫醚键
+       3: 需要在N端才能形成二硫键或硫醚键
   (g) solubility: 溶解性
   (h) hydrophily: 亲水性
 

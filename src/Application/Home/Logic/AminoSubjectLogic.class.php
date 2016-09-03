@@ -264,7 +264,7 @@ class AminoSubjectLogic{
 						}
 					}
 					
-					for($index=1; $index<$map_location; $index++){
+					for($index=0; $index<$map_location; $index++){
 						$tmp = $amino_location[$index];
 						$single = $tmp['single'];
 						
@@ -321,13 +321,16 @@ class AminoSubjectLogic{
 			$cyclo_message = '已选择主链成环，但序列不满足条件，';
 			
 			$default_value = C('default_value');
+			$standard_data = $this->mChemicalData['standard_data'];
 			$nterms = $this->mAminoSubject->mNterms[$chain]['detail'];
+			
 			if(count($nterms)>0){
 				foreach($nterms as $nterm){
 					// 主链成环的nterm必须为H-
-					if($nterm!=$default_value['nterm']){
+					$nterm_amino = $standard_data[$nterm];
+					if($nterm!=$default_value['nterm'] || $nterm_amino['flag']!=4){
 						$cyclo_error = true;
-						$cyclo_message = $cyclo_message . '原因：nterm必须为H';
+						$cyclo_message = $cyclo_message . '原因：nterm必须为H或为4型氨基酸';
 						$this->setMessage($cyclo_message);
 						return;
 					}
@@ -337,10 +340,11 @@ class AminoSubjectLogic{
 			$cterms = $this->mAminoSubject->mCterms[$chain]['detail'];
 			if(count($cterms)>0){
 				foreach($cterms as $cterm){
+					$cterm_amino = $standard_data[$cterm];
 					// 主链成环的cterm必须为OH
-					if($cterm != $default_value['cterm']){
+					if($cterm != $default_value['cterm'] || $cterm_amino['flag']!=4){
 						$cyclo_error = true;
-						$cyclo_message = $cyclo_message . '原因：cterm必须为OH';
+						$cyclo_message = $cyclo_message . '原因：cterm必须为OH或为4型氨基酸';
 						$this->setMessage($cyclo_message);
 						return;
 					}
@@ -430,10 +434,30 @@ class AminoSubjectLogic{
 				$amino_data_first_cyclo_enable = $amino_data_first['cyclo_enable'];	
 				$amino_data_last_cyclo_enable = $amino_data_last['cyclo_enable'];
 				
-				// 前后氨基酸必须为一碱一酸
-				if( ($amino_data_first_enable!=0 && $amino_data_last_cyclo_enable!=0) && $amino_data_first_enable==$amino_data_last_enable){
+				// 前后氨基酸必须为一碱一酸或4型氨基酸
+				$correct = false;
+				$amino_data_first_flag = $amino_data_first['flag'];
+				$amino_data_last_flag = $amino_data_last['flag'];
+				if($amino_data_first_cyclo_enable==1){
+					if($amino_data_last_cyclo_enable==-1 || $amino_data_last_flag==4){
+						$correct = true;
+					}
+				}
+				if($correct!=true && $amino_data_first_cyclo_enable==-1){
+					if($amino_data_last_cyclo_enable==1 || $amino_data_last_flag==4){
+						$correct = true;
+					}
+				}
+				
+				if($correct!=true && $amino_data_first_flag==4){
+					if($amino_data_last_cyclo_enable==-1 || $amino_data_last_cyclo_enable==1 || $amino_data_last_flag==4){
+						$correct = true;
+					}
+				}
+				
+				if(!$correct){
 					$cyclo_error = true;
-					$cyclo_message = $cyclo_message . '原因：氨基酸基团不可成环或酸碱性不正确';
+					$cyclo_message = $cyclo_message . '原因：存在不可成环氨基酸基团或基团不包含侧链羧基和侧链氨基';
 					
 					$this->setMessage($cyclo_message);
 					return;
@@ -522,9 +546,9 @@ class AminoSubjectLogic{
 				$amino_data_last_cyclo_enable = $amino_data_last['cyclo_enable'];
 				
 				// 右氨基酸必须为酸性氨基酸
-				if($amino_data_last_cyclo_enable != -1){
+				if($amino_data_last_cyclo_enable != -1 || $amino_data_last['flag']!=4){
 					$cyclo_error = true;
-					$cyclo_message = $cyclo_message . '原因：最后一个氨基酸基团必须为酸性基团';
+					$cyclo_message = $cyclo_message . '原因：最后一个氨基酸必须含有侧链羧基或4型氨基酸';
 					$this->setMessage($cyclo_message);
 					return;
 				}
@@ -539,8 +563,6 @@ class AminoSubjectLogic{
 					array_push($attachs, 'chain' .$chain. ':' .$cyclo_types[$cyclo_type]);
 				}
 			}
-			
-			
 
 			if(!$cyclo_error){
 				if(isset($elements['H'])){
@@ -605,9 +627,9 @@ class AminoSubjectLogic{
 				
 				
 				// 第一个氨基酸必须为碱性集团
-				if($amino_data_first_cyclo_enable != 1){
+				if($amino_data_first_cyclo_enable != 1 || $amino_data_first['flag']!=4){
 					$cyclo_error = true;
-					$cyclo_message = $cyclo_message . '原因：第一个氨基酸基团必须为碱性基团';
+					$cyclo_message = $cyclo_message . '原因：第一个氨基酸必须含有侧链氨基或4型氨基酸';
 					$this->setMessage($cyclo_message);
 					return;
 				}
@@ -653,19 +675,23 @@ class AminoSubjectLogic{
 			
 			foreach($cyclo_fragment as $fragment){
 				$detail = $fragment['detail'];
-				foreach($detail as $amino){
-					$tmp = $standard_data[$amino];
+				$amino_first = $standard_data[$detail[0]];
+				$amino_last = $standard_data[$detail[count($detail)-1]];
 					
-					if($tmp['cyclo_enable']==2){
-						$exist_amino = $amino;
-					}
+				if($amino_first['cyclo_enable']==2 ){
+					$exist_amino = $amino_first['single'];
 				}
+				
+				if($amino_last['cyclo_enable']==2){
+					$exist_amino = $amino_last['single'];
+				}
+				
 			}
 			
             
 			if(strlen($exist_amino)==0){
 				$cyclo_error = true;
-				$cyclo_message = $cyclo_message . '原因：环中不包含Cys或Mpr氨基酸基团';
+				$cyclo_message = $cyclo_message . '原因：环中第一个或最后一个氨基酸必须为Cys或Mpr等含巯基的氨基酸';
 				$this->setMessage($cyclo_message);
 				return;
 			}
