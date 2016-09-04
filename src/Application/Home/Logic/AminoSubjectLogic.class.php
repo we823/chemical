@@ -68,11 +68,14 @@ class AminoSubjectLogic{
 		$this->getChains($this->mAminoSubject);
 		$this->analyzeSubjects(2);
 		$this->buildAminoInfo(3);
+		$this->fixSpecialAmino();
 		$this->fixMAP(4);
 		$this->buildElements(5);
 		$this->calculateCycloTypes(6);
 		$this->calculateCys(7);
-		$this->fixSpecialFlags();
+		
+		// 已经在pushAminoDetail()中根据flag标记忽略不计算
+		//$this->fixSpecialFlags();
 		$this->buildElementInfos(8);
 		$this->getAttachInfo();
 	}
@@ -180,6 +183,12 @@ class AminoSubjectLogic{
                 }
 			}
 		}else{
+			$default_value = C('default_value');
+			$Ac = $default_value['Ac'];
+			$NH2 = $default_value['NH2'];
+			$nterm = $default_value['nterm'];
+			$cterm = $default_value['cterm'];
+
 			foreach($element_aminos as $key=>$amino){
 				$tmp_standard_data = $standard_data[$key];
 				if(is_null($tmp_standard_data)){
@@ -192,15 +201,50 @@ class AminoSubjectLogic{
 						$elements[$element] += $tmp_standard_data[strtolower($element)] * $amino_count;
 					}
 				}
-				$this->mAminoSubject->mAminoCount += $amino_count;
+				$amino_single = $amino['detail']['single'];
+				// Ac、NH2、H-和OH不计算在氨基酸个数中
+				if($amino_single!=$Ac && $amino_single!= $NH2 && $amino_single!=$nterm && $amino_single!=$cterm){
+					$this->mAminoSubject->mAminoCount += $amino_count;
+				}
+
 				// 亲水性总值计算
-				$this->mAminoSubject->mHydrophilyCount += $tmp_standard_data['hydrophily'];
+				$this->mAminoSubject->mHydrophilyCount += $tmp_standard_data['hydrophily'] * $amino_count;
 				$this->mAminoSubject->mAcidCount += $tmp_standard_data['acid'] * $amino_count;
 				$this->mAminoSubject->mBaseCount += $tmp_standard_data['base'] * $amino_count;
-
+			}
+			// 亲水性需要加入H-和OH
+			$nterms = $this->mAminoSubject->mNterms;
+			$cterms = $this->mAminoSubject->mCterms;
+			
+			$nterm_data = $standard_data[$nterm];
+			$cterm_data = $standard_data[$cterm];
+			foreach($nterms as $terms){
+				foreach($terms as $term){
+					if(count($term)==0) continue;
+					foreach($term as $tmp){
+						if($tmp==$nterm){
+							$this->mAminoSubject->mHydrophilyCount += $nterm_data['hydrophily'];
+							$this->mAminoSubject->mAcidCount += $nterm_data['acid'];
+					        $this->mAminoSubject->mBaseCount += $nterm_data['base'];
+						}
+					}
+				}
+			}
+			
+			foreach($cterms as $terms){
+				foreach($terms as $term){
+					if(count($term)==0) continue;
+					foreach($term as $tmp){
+						if($tmp==$cterm){
+							$this->mAminoSubject->mHydrophilyCount += $cterm_data['hydrophily'];
+							$this->mAminoSubject->mAcidCount += $cterm_data['acid'];
+					        $this->mAminoSubject->mBaseCount += $cterm_data['base'];
+						}
+					}
+				}
 			}
 		}
-		
+
 		$chains = $this->mAminoSubject->mChains;
 		$chain_count = count($chains);
 		if(isset($elements['H'])){
@@ -214,6 +258,7 @@ class AminoSubjectLogic{
 	}
 
 	public function getResult(){
+		$this->getPiAminoCount();
 		return $this->mAminoSubject->getResult();
 	}
 	/**
@@ -678,20 +723,18 @@ class AminoSubjectLogic{
 				$amino_first = $standard_data[$detail[0]];
 				$amino_last = $standard_data[$detail[count($detail)-1]];
 					
-				if($amino_first['cyclo_enable']==2 ){
+				if($amino_first['cyclo_enable']==2 &&  $amino_last['cyclo_enable']!=2){
 					$exist_amino = $amino_first['single'];
 				}
 				
-				if($amino_last['cyclo_enable']==2){
+				if($amino_first['cyclo_enable']!=2 &&  $amino_last['cyclo_enable']==2){
 					$exist_amino = $amino_last['single'];
 				}
-				
 			}
 			
-            
 			if(strlen($exist_amino)==0){
 				$cyclo_error = true;
-				$cyclo_message = $cyclo_message . '原因：环中第一个或最后一个氨基酸必须为Cys或Mpr等含巯基的氨基酸';
+				$cyclo_message = $cyclo_message . '请确认成环可行性';
 				$this->setMessage($cyclo_message);
 				return;
 			}
@@ -766,8 +809,7 @@ class AminoSubjectLogic{
 			$standard_data = $this->mChemicalData['standard_data'];
 			$locations = array();
 			$repeat = array();
-			
-			
+
 			foreach($cys_locations as $index=>$cys_location){
 				$chain = $cys_location['chain'];
 				$location = $cys_location['location'];
@@ -789,10 +831,31 @@ class AminoSubjectLogic{
 					return;
 				}
 				
-				if($tmp['cyclo_enable']!=2){
+				// 3类型的氨基酸必须在nterm才能形成二硫键
+				$correct = false;
+				if($tmp['cyclo_enable']==3){
+					$first_amino = current($this->mAminoSubject->mAminoDetails);
+					$first_amino_single = $first_amino['detail']['single'];
+					if($first_amino_single != $tmp['single']){
+						$this->setMessage('位置'.$location.' 氨基酸不是Nterm，无法形成二硫键');
+					    return;
+					}
+					
+					$correct = true;
+				}
+				
+				// cyclo_enable=2 可成立
+				
+				if($correct==false && $tmp['cyclo_enable']==2){
+					$correct = true;
+				}
+				
+				if(!$correct){
 					$this->setMessage('位置'.$location.' 氨基酸无法形成二硫键，氨基酸为'.$amino['full']);
 					return;
 				}
+				
+				
 				
 				if(isset($locations[$chain.$location])){
 					if($chain=='0'){
@@ -978,33 +1041,32 @@ class AminoSubjectLogic{
 	 * 计算溶水性
 	 */
 	private function getSolubilityIndex(){
-		
 		$y = $this->mAminoSubject->mAminoCount;
-		$acidCount = $this->mAminoSubject->mAcidCount;
-		$baseCount = $this->mAminoSubject->mBaseCount;
+		$acid_count = $this->mAminoSubject->mAcidCount;
+		$base_count = $this->mAminoSubject->mBaseCount;
 		$x = $hydrophily = $this->mAminoSubject->mHydrophily;
 		$character1 = $this->mAminoSubject->mOriginal;
 		
 		$amino_details = $this->mAminoSubject->mAminoDetails;
 		$standard_data = $this->mChemicalData['standard_data'];
-		$standard_index = $this->mBaseIndex['standard_index'];
 		
 		$result_index = -1;
 		
 	    // 特殊序列检查
+	    // RADA\TSTS\IKIE\QQQQ\NNNNN\DSSDSS等循化序列，循环2次以上
 		$specials = ['RADA','TSTS','IKIE','QQQ','NNNNN','DSSDSS'];
 		$pattern = '';
 		for($index=0, $len = count($specials); $index<$len; $index++){
 			$pattern = '(' . $specials[$index] .')';
-			$speicalItems = array();
-		    $special_valid = preg_match_all("/$pattern/", $character1, $speicalItems);
+			$speical_items = array();
+		    $special_valid = preg_match_all("/$pattern/", $character1, $speical_items);
 	
 			if($special_valid>=2){
 			    return 0;
 		    }	
 		}
 	
-		// 氨基酸总个数大于等于10
+		// 序列大于等于10个氨基酸 
 		if($y >= 10){
 			$special_aminos = ['D','E','N','Q','R','S','T','Y'];
 			$special_count = 0;
@@ -1013,18 +1075,21 @@ class AminoSubjectLogic{
 					$special_count += $amino_details[$amino]['count'];
 				}
 			}
-	
+	        
+			// D、E、N、Q、R、S、T或Y残基个数超过60%,
 			if(($special_count / $y) > 0.6){
 	            
-				$abPercent = ($acidCount + $baseCount)/$y;
-				if( $abPercent <= 0.4 ){
+				$ab_percent = ($acid_count + $base_count)/$y;
+				//酸个数（算含量、溶解性）和碱个数（算含量、溶解性）的总个数≤40%，
+				if( $ab_percent <= 0.4 ){
+					// 其他条件
 					$result_index = 3;
-					
-					if( ($baseCount / $y)>=0.25){
+					// 当碱个数（算含量、溶解性）≥25%
+					if( ($base_count / $y)>=0.25){
 						$result_index = 1;
 					}
-					
-					if( ($acidCount/$y)>=0.25){
+					// 当酸个数（算含量、溶解性）≥25%
+					if( ($acid_count/$y)>=0.25){
 						$result_index = 2;
 					}
 					
@@ -1033,67 +1098,42 @@ class AminoSubjectLogic{
 		    }
 		}
 	
+	    // Y≤5且X＞-0.5
 	    if($y<=5 && $x>-0.5){
 	    	return 4;
 	    }
 		
 		$amino_detail_values = array_values($amino_details);
-		
 		if($x>0 && $x<=0.5){
 			// 需要计算连续8个氨基酸的亲水性<=0
-			$acidAminoCount = 0;
-			$firstIndex = 0;
-			
-			$_acid = $standard_index['acid'];
-			for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
-				$standard = $standard_data[$amino_detail_values[$index]];
+			$acid_amino_count = $this->calculateHydrophilyMaxCount();
 	
-				$acidValue = $standard[$_acid];
-				if($acidValue<=0){
-					$acidAminoCount++;
-				}else{
-					$acidAminoCount=0;
-				}
-			}
-	
-			if($acidAminoCount>=8){
+			if($acid_amino_count>=8){
 				return 5;
 			}
 			
 		}
 		
 		if($x > 0){
-	
 			return 4;
-			
 		}else if($x<=0 && $x>-1){
 			
 			$result_index = 9;
 	
-			if( ($baseCount - $acidCount) >= 2 ){
+			if( ($base_count - $acid_count) >= 2 ){
 				// 需要计算连续6个氨基酸的亲水性<=0
-				$acidAminoCount = 0;
-				$firstIndex = 0;
-				$_acid = $standard_index['acid'];
-				for($index=0, $amino_detail_count=count($amino_details); $index<$amino_detail_count; $index++){
-					$standard = $standard_data[$amino_detail_values[$index]];
-					$acidValue = $standard[$_acid];
-					if($acidValue<=0){
-						$acidAminoCount++;
-					}else{
-						$acidAminoCount=0;
-					}
-				}
+				$acid_amino_count = $this->calculateHydrophilyMaxCount();
 	
-				if($acidAminoCount>=6){
+				if($acid_amino_count>=6){
 					return 6;
 				}
 			}
-			if( ($baseCount - $acidCount) >= 2){
+			
+			if( ($base_count - $acid_count) >= 2){
 				return 7;
 			}
 			
-			if( ($acidCount - $baseCount)>=2 || ($acidCount>0 && $baseCount==0) ){
+			if( ($acid_count - $base_count)>=2 || ($acid_count>0 && $base_count==0) ){
 				return 8;
 			}
 			return $result_index;
@@ -1101,7 +1141,7 @@ class AminoSubjectLogic{
 			
 			$result_index = 11;
 			
-			if( ($acidCount - $baseCount)>=2 || ($acidCount>0 && $baseCount==0)){
+			if( ($acid_count - $base_count)>=2 || ($acid_count>0 && $base_count==0)){
 				$result_index = 10;
 			}
 			return $result_index;
@@ -2132,4 +2172,220 @@ class AminoSubjectLogic{
 		$this->mAminoSubject->mMessage = $message;
 	}
 	
+	private function getPiAminoCount(){
+		$pi_aminos = $this->mAminoSubject->mPiAminos;
+		if(count($pi_aminos)==0) return;
+		
+		$default_value = C('default_value');
+		$Ac = $default_value['Ac'];
+		$NH2 = $default_value['NH2'];
+		$nterm = $default_value['nterm'];
+		$cterm = $default_value['cterm'];
+		
+		$pi_amino_count = 0;
+		foreach($pi_aminos as $pi_amino){
+			$single = $pi_amino['detail']['single'];
+			if($single!=$Ac && $single!=$NH2 && $single!=$nterm && $single!=$cterm){
+				$pi_amino_count += $pi_amino['count'];
+			}
+		}
+		
+		$this->mAminoSubject->mPiAminoCount = $pi_amino_count;
+	}
+	
+	/**
+	 * 计算连续亲水性个数的最大值
+	 * @param $hydrophilyValue 需要比较亲水性默认值
+	 * @return $max_count 最大的值
+	 */
+	private function calculateHydrophilyMaxCount($hydrophilyValue=0){
+		$amino_fragments = $this->mAminoSubject->mFragments;
+		if(count($amino_fragments)==0) return 0;
+		$hydrophily_counts = array();
+		$amino_single_list = array();
+		foreach($amino_fragments as $chain=>$amino_fragment){
+			$amino_all_list = array();
+			$this->getHydrophilyFragments($amino_single_list, $amino_all_list, $amino_fragment);
+		}
+		if(count($amino_single_list)==0) return 0;
+
+		$standard_data = $this->mChemicalData['standard_data'];
+		foreach($amino_single_list as $amino_singles){
+			$hydrophily_count = 0;
+			foreach($amino_singles as $amino_single){
+				$tmp_amino = $standard_data[$amino_single];
+				$hydrophily = $tmp_amino['hydrophily'];
+				if($hydrophily <= $hydrophilyValue){
+					$hydrophily_count++;
+				}else{
+					if($hydrophily_count>0){
+						array_push($hydrophily_counts, $hydrophily_count);
+					}
+					$hydrophily_count = 0;
+				}
+			}
+			if($hydrophily_count>0){
+				array_push($hydrophily_counts, $hydrophily_count);
+			}
+		}
+		$max_count = 0;
+		foreach($hydrophily_counts as $hydrophily_count){
+			$max_count = ($max_count<$hydrophily_count) ? $hydrophily_count : $max_count;
+		}
+		return $max_count;
+	}
+	
+	private function getHydrophilyFragments(&$rAminoSingleList, &$rAminoAllList, $amino_fragment){
+		$next_fragments = array();
+		if(is_object($amino_fragment)){
+			$amino_fragment = array($amino_fragment);
+		}
+
+		foreach($amino_fragment as $fragment){
+			$detail = $fragment->mDetail;
+			$has_flag = $fragment->mHasFlag;
+			$flag_data = $fragment->mFlagData;
+			if($has_flag){
+				if($flag_data['flag']==1){ // 如果flag为1，则需要加入亲水性计算中
+					array_push($rAminoAllList, $flag_data['single']);
+					if(count($detail)>0){
+						array_push($rAminoSingleList, $detail);
+					}else{
+						array_push($next_fragments, $fragment->fragments);
+					}
+				}else{
+					array_push($next_fragments, $fragment->fragments);
+				}
+			}else{
+				foreach($detail as $tmp){
+					array_push($rAminoAllList, $tmp);
+				}
+			}
+		}
+		if(count($next_fragments)>0){
+			foreach($next_fragments as $next_fragment){
+				$this->getHydrophilyFragments($rAminoSingleList, $rAminoAllList, $next_fragment);
+			}	
+		}
+
+		array_push($rAminoSingleList, $rAminoAllList);
+	}
+	
+	/**
+	 * 特殊氨基酸修正
+	 */
+	private function fixSpecialAmino(){
+		$standard_data = $this->mChemicalData['standard_data'];
+		$nterms = $this->mAminoSubject->mNterms;
+		$cterms = $this->mAminoSubject->mCterms;
+		
+		$amino_details = $this->mAminoSubject->mAminoDetails;
+		$element_aminos = $this->mAminoSubject->mElementAminos;
+		$pi_aminos = $this->mAminoSubject->mPiAminos;
+		
+		$lys_single = C('lys_single');
+		$glu_single = C('glu_single');
+
+		foreach($nterms as $chain=>$nterm_list){
+			if(count($nterm_list)==0) continue;
+			$nterm_details = $nterm_list['detail'];
+			foreach($nterm_details as $nterm){
+				$term_data = $standard_data[$nterm];
+				$flag = $term_data['flag'];
+				if($flag==4){
+					if(isset($amino_details[$lys_single])){
+						$amino_details[$lys_single]['count'] += 1;
+						$element_aminos[$lys_single]['count'] += 1;
+						$pi_aminos[$lys_single]['count'] += 1;
+					}else{
+						$lys_data = $standard_data[$lys_single];
+						$amino_details[$lys_single]['name'] = $lys_data['full'];
+						$amino_details[$lys_single]['detail'] = $lys_data;
+						$amino_details[$lys_single]['count'] = 1;
+						$amino_details[$lys_single]['residue'] = $lys_data['residue'];
+						
+						$element_aminos[$lys_single] = $amino_details[$lys_single];
+						
+						$pi_aminos[$lys_single] = $amino_details[$lys_single];
+					}
+				}
+			}
+		}
+		
+		foreach($cterms as $chain=>$cterm_list){
+			if(count($cterm_list)==0) continue;
+			foreach($cterm_list as $cterm){
+				$term_data = $standard_data[$cterm];
+				$flag = $term_data['flag'];
+				if($flag==4){
+					if(isset($amino_details[$glu_single])){
+						$amino_details[$glu_single]['count'] += 1;
+						$element_aminos[$glu_single]['count'] += 1;
+						$pi_aminos[$glu_single]['count'] += 1;
+					}else{
+						$glu_data = $standard_data[$glu_single];
+						$amino_details[$glu_single]['name'] = $glu_data['full'];
+						$amino_details[$glu_single]['detail'] = $glu_data;
+						$amino_details[$glu_single]['count'] = 1;
+						$amino_details[$glu_single]['residue'] = $glu_data['residue'];
+						
+						$element_aminos[$glu_single] = $amino_details[$glu_single];
+						
+						$pi_aminos[$glu_single] = $amino_details[$glu_single];
+					}
+				}
+			}
+		}
+		
+		foreach($amino_details as $amino_detail){
+			$detail = $amino_detail['detail'];
+			$flag = $amino_detail['detail']['flag'];
+			if($flag==5){
+				$this->mAminoSubject->mCtermValue += 1;
+			}
+			
+			if($flag==6){
+				$this->mAminoSubject->mNtermValue += 1;
+			}
+			
+			if($flag==7){
+               if(isset($amino_details[$glu_single])){
+					$amino_details[$glu_single]['count'] += 1;
+					$element_aminos[$glu_single]['count'] += 1;
+					$pi_aminos[$glu_single]['count'] += 1;
+				}else{
+					$amino_details[$glu_single]['name'] = $detail['full'];
+					$amino_details[$glu_single]['detail'] = $detail;
+					$amino_details[$glu_single]['count'] = 1;
+					$amino_details[$glu_single]['residue'] = $detail['residue'];
+					
+					$element_aminos[$glu_single] = $amino_details[$glu_single];
+					
+					$pi_aminos[$glu_single] = $amino_details[$glu_single];
+
+				}
+			}
+			
+			if($flag==8){
+				if(isset($amino_details[$lys_single])){
+					$amino_details[$lys_single]['count'] += 1;
+					$element_aminos[$lys_single]['count'] += 1;
+					$pi_aminos[$lys_single]['count'] += 1;
+				}else{
+					$amino_details[$lys_single]['name'] = $detail['full'];
+					$amino_details[$lys_single]['detail'] = $detail;
+					$amino_details[$lys_single]['count'] = 1;
+					$amino_details[$lys_single]['residue'] = $detail['residue'];
+					
+					$element_aminos[$lys_single] = $amino_details[$lys_single];
+					
+					$pi_aminos[$lys_single] = $amino_details[$lys_single];
+				}
+			}
+		}
+
+       $this->mAminoSubject->mAminoDetails = $amino_details;
+	   $this->mAminoSubject->mElementAminos = $element_aminos;
+	   $this->mAminoSubject->mPiAminos = $pi_aminos;
+	}
 }

@@ -36,6 +36,8 @@ class AminoSubjectModel{
 	private $mEm=0;
 	// 氨基酸总个数
 	private $mAminoCount=0;
+	// 计算pi相关的氨基酸总个数
+	private $mPiAminoCount = 0;
 	// 酸基个数
 	private $mAcidCount = 0;
 	// 碱基个数
@@ -248,7 +250,6 @@ class AminoSubjectModel{
 			$this->mMessage = $message;
 		}
 		
-		$pi_amino_count = $this->getPiAminoCount();
 		return array(
 		   'attachs'=>$this->mAttachs,
 		   'single'=>$this->mSingle,
@@ -260,7 +261,7 @@ class AminoSubjectModel{
 		   'elementAminos'=>$this->mElementAminos,
 		   'elements'=>$this->mElements,
 		   'piAminos'=>$this->mPiAminos,
-		   'piAminoCount'=>$pi_amino_count,
+		   'piAminoCount'=>$this->mPiAminoCount,
 		   'specialFlags'=>$this->mSpecialFlags,
 		   'aminoLocation'=>$this->mAminoLocation,
 		   'cycloFragments'=>$this->mCycloFragments,
@@ -295,15 +296,4 @@ class AminoSubjectModel{
 	public function __toString(){
 		return 'hasError: '.$this->mHasError.' message: '.$this->mMessage.' single: '.$this->mSingle.' full:'.$this->mFull;
 	}
-	
-	private function getPiAminoCount(){
-		$pi_aminos = $this->mPiAminos;
-		$pi_amino_count = 0;
-		foreach($pi_aminos as $pi_amino){
-			$pi_amino_count += $pi_amino['count'];
-		}
-		
-		return $pi_amino_count;
-	}
-
 }

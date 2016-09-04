@@ -12,7 +12,7 @@ return array(
     'webname' => '多肽氨基酸计算',
     'base'=>__ROOT__,
     'nterm_flag'=>'2,4',
-    'cterm_flag'=>'3',
+    'cterm_flag'=>'3,4',
 	'simple_version'=>'0.0.1',
 	'advance_version'=>'0.0.1',
 	'element_index'=>array(
@@ -49,6 +49,10 @@ return array(
 	),
 	'default_value'=>array(
 	  'nterm'=>'H-',
-	  'cterm'=>'OH'
-	)
+	  'cterm'=>'OH',
+	  'Ac'=>'Ac',
+	  'NH2'=>'NH2'
+	),
+	'lys_single'=>'K',
+	'glu_single'=>'E'
 );
