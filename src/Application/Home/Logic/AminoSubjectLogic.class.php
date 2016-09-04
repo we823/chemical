@@ -75,7 +75,7 @@ class AminoSubjectLogic{
 		$this->calculateCys(7);
 		
 		// 已经在pushAminoDetail()中根据flag标记忽略不计算
-		//$this->fixSpecialFlags();
+		$this->fixSpecialFlags();
 		$this->buildElementInfos(8);
 		$this->getAttachInfo();
 	}
@@ -373,7 +373,11 @@ class AminoSubjectLogic{
 				foreach($nterms as $nterm){
 					// 主链成环的nterm必须为H-
 					$nterm_amino = $standard_data[$nterm];
-					if($nterm!=$default_value['nterm'] || $nterm_amino['flag']!=4){
+					$nterm_correct = false;
+					if($nterm==$default_value['nterm'] || $nterm_amino['flag']==4){
+						$nterm_correct = true;
+					}
+					if($nterm_correct==false){
 						$cyclo_error = true;
 						$cyclo_message = $cyclo_message . '原因：nterm必须为H或为4型氨基酸';
 						$this->setMessage($cyclo_message);
@@ -387,7 +391,11 @@ class AminoSubjectLogic{
 				foreach($cterms as $cterm){
 					$cterm_amino = $standard_data[$cterm];
 					// 主链成环的cterm必须为OH
-					if($cterm != $default_value['cterm'] || $cterm_amino['flag']!=4){
+					$cterm_correct = false;
+					if($cterm == $default_value['cterm'] || $cterm_amino['flag']!=4){
+						$cterm_correct = true;
+					}
+					if($cterm_correct==false){
 						$cyclo_error = true;
 						$cyclo_message = $cyclo_message . '原因：cterm必须为OH或为4型氨基酸';
 						$this->setMessage($cyclo_message);
@@ -837,7 +845,7 @@ class AminoSubjectLogic{
 					$first_amino = current($this->mAminoSubject->mAminoDetails);
 					$first_amino_single = $first_amino['detail']['single'];
 					if($first_amino_single != $tmp['single']){
-						$this->setMessage('位置'.$location.' 氨基酸不是Nterm，无法形成二硫键');
+						$this->setMessage('位置'.$location.' 氨基酸不在N-Term上，无法形成二硫键');
 					    return;
 					}
 					
@@ -939,6 +947,8 @@ class AminoSubjectLogic{
     public function fixSpecialFlags(){
     	$special_flags = $this->mAminoSubject->mSpecialFlags;
 		if(count($special_flags)>0){
+			// 已经在pushAminoDetail()中根据flag标记忽略不计算
+			/**
 			$pi_aminos = $this->mAminoSubject->mPiAminos;
 			foreach($special_flags as $amino=>$special_flag){
 				$tmp = $pi_aminos[$amino];
@@ -948,6 +958,13 @@ class AminoSubjectLogic{
 			}
 			
 			$this->mAminoSubject->mPiAminos = $pi_aminos;
+			 * */
+			// 亲水性需要计算
+			foreach($special_flags as $amino=>$special_flag){
+			   if($special_flag['flag_data']['flag']==1){
+			   	    $this->mAminoSubject->mHydrophilyCount -= 2;
+			   }
+			}
 		}
     }
 	/**
