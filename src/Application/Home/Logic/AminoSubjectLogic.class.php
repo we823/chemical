@@ -4,6 +4,7 @@ namespace Home\Logic;
 class AminoSubjectLogic{
 	
 	private $mChemicalData;
+	private $mDefaultValue;
 	private $mAminoSubject;
 	private $mResultType;
 	private $mCycloType;
@@ -53,6 +54,7 @@ class AminoSubjectLogic{
 		);
 		
 		$this->mResultType = C('result_type');
+		$this->mDefaultValue = C('default_value');
 	}
 	
 	public function __set($name, $value){
@@ -383,8 +385,8 @@ class AminoSubjectLogic{
 						$this->setMessage($cyclo_message);
 						return;
 					}
-					$this->mAminoSubject->mNtermValue -= 1;
 				}
+				$this->mAminoSubject->mNtermValue -= 1;
 			}
 			$cterms = $this->mAminoSubject->mCterms[$chain]['detail'];
 			if(count($cterms)>0){
@@ -401,8 +403,8 @@ class AminoSubjectLogic{
 						$this->setMessage($cyclo_message);
 						return;
 					}
-					$this->mAminoSubject->mCtermValue -= 1;
 				}
+				$this->mAminoSubject->mCtermValue -= 1;
 			}
 			
 			// 主链成环的cyclo必须在序列的两端。
@@ -585,6 +587,7 @@ class AminoSubjectLogic{
 			
 			$cyclo_fragment = $this->mAminoSubject->mCycloFragments[$chain];
             
+			$default_value = $this->mDefaultValue;
 			foreach($cyclo_fragment as $fragment){
 				$detail = $fragment['detail'];
 				if(is_null($detail) || count($detail)==0){
@@ -594,14 +597,27 @@ class AminoSubjectLogic{
 					return;
 				}
 				
+				$amino_first = $detail[0];
+				$amino_data_first = $standard_data[$amino_first];
+				$correct = false;
+
+				if($amino_data_first['flag']==2 || $amino_data_first['flag']==7){
+					$cyclo_error = true;
+					$cyclo_message = $cyclo_message.'原因： 第一个氨基酸必须为H或为4类型氨基酸';
+					$this->setMessage($cyclo_message);
+					return;
+				}
+				
 				$amino_last = $detail[count($detail)-1];
+				
 				$amino_data_last = $standard_data[$amino_last];
 				$amino_data_last_cyclo_enable = $amino_data_last['cyclo_enable'];
 				
+				
 				// 右氨基酸必须为酸性氨基酸
-				if($amino_data_last_cyclo_enable != -1 || $amino_data_last['flag']!=4){
+				if($amino_data_last_cyclo_enable != -1){
 					$cyclo_error = true;
-					$cyclo_message = $cyclo_message . '原因：最后一个氨基酸必须含有侧链羧基或4型氨基酸';
+					$cyclo_message = $cyclo_message . '原因：最后一个氨基酸必须含有侧链羧基';
 					$this->setMessage($cyclo_message);
 					return;
 				}
@@ -664,6 +680,8 @@ class AminoSubjectLogic{
 			$standard_data = $this->mChemicalData['standard_data'];
 			
 			$cyclo_fragment = $this->mAminoSubject->mCycloFragments[$chain];
+			
+			$default_value = $this->mDefaultValue;
 			foreach($cyclo_fragment as $fragment){
 				$detail = $fragment['detail'];
 				if(is_null($detail) || count($detail)==0){
@@ -678,11 +696,20 @@ class AminoSubjectLogic{
 				$amino_data_first = $standard_data[$amino_first];
 				$amino_data_first_cyclo_enable = $amino_data_first['cyclo_enable'];
 				
-				
 				// 第一个氨基酸必须为碱性集团
-				if($amino_data_first_cyclo_enable != 1 || $amino_data_first['flag']!=4){
+				if($amino_data_first_cyclo_enable != 1){
 					$cyclo_error = true;
-					$cyclo_message = $cyclo_message . '原因：第一个氨基酸必须含有侧链氨基或4型氨基酸';
+					$cyclo_message = $cyclo_message . '原因：第一个氨基酸必须含有侧链氨基';
+					$this->setMessage($cyclo_message);
+					return;
+				}
+				
+				$amino_last = $detail[count($detail)-1];
+				$amino_last_data = $standard_data[$amino_last];
+				
+				if($amino_last_data['flag']==3 || $amino_last_data['flag']==8){
+					$cyclo_error = true;
+					$cyclo_message = $cyclo_message . '原因：最后一个氨基酸必须为OH或4型氨基酸';
 					$this->setMessage($cyclo_message);
 					return;
 				}
@@ -2289,7 +2316,7 @@ class AminoSubjectLogic{
 	}
 	
 	/**
-	 * 特殊氨基酸修正
+	 * 特殊氨基酸对pi影响的修正
 	 */
 	private function fixSpecialAmino(){
 		$standard_data = $this->mChemicalData['standard_data'];
@@ -2297,7 +2324,6 @@ class AminoSubjectLogic{
 		$cterms = $this->mAminoSubject->mCterms;
 		
 		$amino_details = $this->mAminoSubject->mAminoDetails;
-		$element_aminos = $this->mAminoSubject->mElementAminos;
 		$pi_aminos = $this->mAminoSubject->mPiAminos;
 		
 		$lys_single = C('lys_single');
@@ -2310,20 +2336,14 @@ class AminoSubjectLogic{
 				$term_data = $standard_data[$nterm];
 				$flag = $term_data['flag'];
 				if($flag==4){
-					if(isset($amino_details[$lys_single])){
-						$amino_details[$lys_single]['count'] += 1;
-						$element_aminos[$lys_single]['count'] += 1;
+					if(isset($pi_aminos[$lys_single])){
 						$pi_aminos[$lys_single]['count'] += 1;
 					}else{
 						$lys_data = $standard_data[$lys_single];
-						$amino_details[$lys_single]['name'] = $lys_data['full'];
-						$amino_details[$lys_single]['detail'] = $lys_data;
-						$amino_details[$lys_single]['count'] = 1;
-						$amino_details[$lys_single]['residue'] = $lys_data['residue'];
-						
-						$element_aminos[$lys_single] = $amino_details[$lys_single];
-						
-						$pi_aminos[$lys_single] = $amino_details[$lys_single];
+						$pi_aminos[$lys_single]['name'] = $lys_data['full'];
+						$pi_aminos[$lys_single]['detail'] = $lys_data;
+						$pi_aminos[$lys_single]['count'] = 1;
+						$pi_aminos[$lys_single]['residue'] = $lys_data['residue'];
 					}
 				}
 			}
@@ -2335,20 +2355,14 @@ class AminoSubjectLogic{
 				$term_data = $standard_data[$cterm];
 				$flag = $term_data['flag'];
 				if($flag==4){
-					if(isset($amino_details[$glu_single])){
-						$amino_details[$glu_single]['count'] += 1;
-						$element_aminos[$glu_single]['count'] += 1;
+					if(isset($pi_aminos[$glu_single])){
 						$pi_aminos[$glu_single]['count'] += 1;
 					}else{
 						$glu_data = $standard_data[$glu_single];
-						$amino_details[$glu_single]['name'] = $glu_data['full'];
-						$amino_details[$glu_single]['detail'] = $glu_data;
-						$amino_details[$glu_single]['count'] = 1;
-						$amino_details[$glu_single]['residue'] = $glu_data['residue'];
-						
-						$element_aminos[$glu_single] = $amino_details[$glu_single];
-						
-						$pi_aminos[$glu_single] = $amino_details[$glu_single];
+						$pi_aminos[$glu_single]['name'] = $glu_data['full'];
+						$pi_aminos[$glu_single]['detail'] = $glu_data;
+						$pi_aminos[$glu_single]['count'] = 1;
+						$pi_aminos[$glu_single]['residue'] = $glu_data['residue'];
 					}
 				}
 			}
@@ -2366,43 +2380,27 @@ class AminoSubjectLogic{
 			}
 			
 			if($flag==7){
-               if(isset($amino_details[$glu_single])){
-					$amino_details[$glu_single]['count'] += 1;
-					$element_aminos[$glu_single]['count'] += 1;
+               if(isset($pi_aminos[$glu_single])){
 					$pi_aminos[$glu_single]['count'] += 1;
 				}else{
-					$amino_details[$glu_single]['name'] = $detail['full'];
-					$amino_details[$glu_single]['detail'] = $detail;
-					$amino_details[$glu_single]['count'] = 1;
-					$amino_details[$glu_single]['residue'] = $detail['residue'];
-					
-					$element_aminos[$glu_single] = $amino_details[$glu_single];
-					
-					$pi_aminos[$glu_single] = $amino_details[$glu_single];
-
+					$pi_aminos[$glu_single]['name'] = $detail['full'];
+					$pi_aminos[$glu_single]['detail'] = $detail;
+					$pi_aminos[$glu_single]['count'] = 1;
+					$pi_aminos[$glu_single]['residue'] = $detail['residue'];
 				}
 			}
 			
 			if($flag==8){
-				if(isset($amino_details[$lys_single])){
-					$amino_details[$lys_single]['count'] += 1;
-					$element_aminos[$lys_single]['count'] += 1;
+				if(isset($pi_aminos[$lys_single])){
 					$pi_aminos[$lys_single]['count'] += 1;
 				}else{
-					$amino_details[$lys_single]['name'] = $detail['full'];
-					$amino_details[$lys_single]['detail'] = $detail;
-					$amino_details[$lys_single]['count'] = 1;
-					$amino_details[$lys_single]['residue'] = $detail['residue'];
-					
-					$element_aminos[$lys_single] = $amino_details[$lys_single];
-					
-					$pi_aminos[$lys_single] = $amino_details[$lys_single];
+					$pi_aminos[$lys_single]['name'] = $detail['full'];
+					$pi_aminos[$lys_single]['detail'] = $detail;
+					$pi_aminos[$lys_single]['count'] = 1;
+					$pi_aminos[$lys_single]['residue'] = $detail['residue'];
 				}
 			}
 		}
-
-       $this->mAminoSubject->mAminoDetails = $amino_details;
-	   $this->mAminoSubject->mElementAminos = $element_aminos;
 	   $this->mAminoSubject->mPiAminos = $pi_aminos;
 	}
 }

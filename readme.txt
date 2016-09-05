@@ -10,11 +10,11 @@
        1表示为普通氨基酸，
        2为nterm，
        3为cterm,
-       4为仅在Nterm时需要增加1个Lys，Cterm时增加1个Glu
+       4为仅在Nterm时需要在计算pi时增加1个Lys，Cterm时在计算pi时增加1个Glu
        5为需要增加1个C-term,
        6为需要增加一个N-term,且不出现在N-term上
-       7(双羧基）为只在N-term上无N-term，需要增加一个Glu；
-       8（双氨基）为只在C-term上，需要增加1个Lys
+       7(双羧基）为只在N-term上无N-term，需要在计算pi时增加一个Glu；
+       8（双氨基）为只在C-term上，需要在计算pi时增加1个Lys
   (e) term_value: 表明当此氨基酸对应flag=2、flag=3时term的值
   (f) cyclo_enable: 
        -1： 含侧链羧基，可参与成环
