@@ -51,8 +51,8 @@ return array(
 	  'nterm'=>'H-',
 	  'cterm'=>'OH',
 	  'Ac'=>'Ac',
-	  'NH2'=>'NH2'
-	),
-	'lys_single'=>'K',
-	'glu_single'=>'E'
+	  'NH2'=>'NH2',
+	  'lys_single'=>'K',
+	  'glu_single'=>'E'
+	)
 );

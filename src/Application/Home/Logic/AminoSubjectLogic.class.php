@@ -367,16 +367,20 @@ class AminoSubjectLogic{
 		if($cyclo_type==0){
 			$cyclo_message = '已选择主链成环，但序列不满足条件，';
 			
-			$default_value = C('default_value');
+			$default_value = $this->mDefaultValue;
 			$standard_data = $this->mChemicalData['standard_data'];
 			$nterms = $this->mAminoSubject->mNterms[$chain]['detail'];
 			
 			if(count($nterms)>0){
+				$has_nterm_4 = false;
 				foreach($nterms as $nterm){
 					// 主链成环的nterm必须为H-
 					$nterm_amino = $standard_data[$nterm];
 					$nterm_correct = false;
 					if($nterm==$default_value['nterm'] || $nterm_amino['flag']==4){
+						if($nterm_amino['flag']==4){
+							$has_nterm_4 = true;
+						}
 						$nterm_correct = true;
 					}
 					if($nterm_correct==false){
@@ -386,15 +390,30 @@ class AminoSubjectLogic{
 						return;
 					}
 				}
-				$this->mAminoSubject->mNtermValue -= 1;
+				if($has_nterm_4){
+					$pi_aminos = $this->mAminoSubject->mPiAminos;
+					
+					if(isset($pi_aminos[$default_value['lys_single']])){
+						$pi_aminos[$default_value['lys_single']]['count'] -= 1;
+					}
+					
+					$this->mAminoSubject->mPiAminos = $pi_aminos;
+				}else{
+					$this->mAminoSubject->mNtermValue -= 1;
+				}
+				
 			}
 			$cterms = $this->mAminoSubject->mCterms[$chain]['detail'];
 			if(count($cterms)>0){
+				$has_cterm_4 = false;
 				foreach($cterms as $cterm){
 					$cterm_amino = $standard_data[$cterm];
 					// 主链成环的cterm必须为OH
 					$cterm_correct = false;
-					if($cterm == $default_value['cterm'] || $cterm_amino['flag']!=4){
+					if($cterm == $default_value['cterm'] || $cterm_amino['flag']==4){
+						if($cterm_amino['flag']==4){
+							$has_cterm_4 = true;
+						}
 						$cterm_correct = true;
 					}
 					if($cterm_correct==false){
@@ -404,7 +423,17 @@ class AminoSubjectLogic{
 						return;
 					}
 				}
-				$this->mAminoSubject->mCtermValue -= 1;
+				if($has_cterm_4){
+					$pi_aminos = $this->mAminoSubject->mPiAminos;
+					
+					if(isset($pi_aminos[$default_value['glu_single']])){
+						$pi_aminos[$default_value['glu_single']]['count'] -= 1;
+					}
+					
+					$this->mAminoSubject->mPiAminos = $pi_aminos;
+				}else{
+					$this->mAminoSubject->mCtermValue -= 1;
+				}
 			}
 			
 			// 主链成环的cyclo必须在序列的两端。
@@ -588,6 +617,8 @@ class AminoSubjectLogic{
 			$cyclo_fragment = $this->mAminoSubject->mCycloFragments[$chain];
             
 			$default_value = $this->mDefaultValue;
+			
+			$has_nterm_4 = false;
 			foreach($cyclo_fragment as $fragment){
 				$detail = $fragment['detail'];
 				if(is_null($detail) || count($detail)==0){
@@ -600,7 +631,9 @@ class AminoSubjectLogic{
 				$amino_first = $detail[0];
 				$amino_data_first = $standard_data[$amino_first];
 				$correct = false;
-
+                if($amino_data_first['flag']==4){
+                	$has_nterm_4 = true;
+                }
 				if($amino_data_first['flag']==2 || $amino_data_first['flag']==7){
 					$cyclo_error = true;
 					$cyclo_message = $cyclo_message.'原因： 第一个氨基酸必须为H或为4类型氨基酸';
@@ -641,8 +674,15 @@ class AminoSubjectLogic{
 				if(isset($elements['O'])){
 					$elements['O'] -= 1;
 				}
-
-				$this->mAminoSubject->mNtermValue -= 1;
+				// 4类型需要减Lys
+                if($has_nterm_4){
+                	if(isset($pi_aminos[$default_value['lys_single']])){
+                		$pi_aminos[$default_value['lys_single']]['count'] -= 1;
+                	}
+                }else{
+                	$this->mAminoSubject->mNtermValue -= 1;
+                }
+				
 				$this->mAminoSubject->mHydrophilyCount -= 3;
 				
 				$this->mAminoSubject->mPiAminos = $pi_aminos;
@@ -682,6 +722,7 @@ class AminoSubjectLogic{
 			$cyclo_fragment = $this->mAminoSubject->mCycloFragments[$chain];
 			
 			$default_value = $this->mDefaultValue;
+			$has_cterm_4 = false;
 			foreach($cyclo_fragment as $fragment){
 				$detail = $fragment['detail'];
 				if(is_null($detail) || count($detail)==0){
@@ -706,7 +747,9 @@ class AminoSubjectLogic{
 				
 				$amino_last = $detail[count($detail)-1];
 				$amino_last_data = $standard_data[$amino_last];
-				
+				if($amino_last_data['flag']==4){
+					$has_cterm_4 = true;
+				}
 				if($amino_last_data['flag']==3 || $amino_last_data['flag']==8){
 					$cyclo_error = true;
 					$cyclo_message = $cyclo_message . '原因：最后一个氨基酸必须为OH或4型氨基酸';
@@ -736,7 +779,14 @@ class AminoSubjectLogic{
 				$elements['O'] -= 1;
 			}
 			
-			$this->mAminoSubject->mCtermValue -= 1;
+			if($has_cterm_4){
+				if(isset($pi_aminos[$default_value['glu_single']])){
+					$pi_aminos[$default_value['glu_single']]['count'] -= 1;
+				}
+			}else{
+				$this->mAminoSubject->mCtermValue -= 1;
+			}
+			
 			$this->mAminoSubject->mHydrophilyCount -= 3;
 			
 			$this->mAminoSubject->mPiAminos = $pi_aminos;
@@ -2326,8 +2376,9 @@ class AminoSubjectLogic{
 		$amino_details = $this->mAminoSubject->mAminoDetails;
 		$pi_aminos = $this->mAminoSubject->mPiAminos;
 		
-		$lys_single = C('lys_single');
-		$glu_single = C('glu_single');
+		$default_value = $this->mDefaultValue;
+		$lys_single = $default_value['lys_single'];
+		$glu_single = $default_value['glu_single'];
 
 		foreach($nterms as $chain=>$nterm_list){
 			if(count($nterm_list)==0) continue;
@@ -2345,6 +2396,8 @@ class AminoSubjectLogic{
 						$pi_aminos[$lys_single]['count'] = 1;
 						$pi_aminos[$lys_single]['residue'] = $lys_data['residue'];
 					}
+					// 4类型氨基酸在Nterm时，亲水性+2
+					$this->mAminoSubject->mHydrophilyCount += 2;
 				}
 			}
 		}
@@ -2364,6 +2417,9 @@ class AminoSubjectLogic{
 						$pi_aminos[$glu_single]['count'] = 1;
 						$pi_aminos[$glu_single]['residue'] = $glu_data['residue'];
 					}
+                    
+					// 对于序列类型为4（data-full表中的flag）的氨基酸，如果在序列的C-term或N-term，亲水性需要+2
+                    $this->mAminoSubject->mHydrophilyCount += 2;
 				}
 			}
 		}
