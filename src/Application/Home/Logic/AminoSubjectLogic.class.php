@@ -1549,15 +1549,13 @@ class AminoSubjectLogic{
 				break;
 			}
         }
-		
-		
 		if($success==false){
 			$this->setMessage($this->mAminoSubject->mMessage);
 			return;
 		}
 		
 		// 补足默认的nterm和cterm信息
-		$default_value = C('default_value');
+		$default_value = $this->mDefaultValue;
 		$standard_data = $this->mChemicalData['standard_data'];
 		$nterms = $this->mAminoSubject->mNterms;
 		$nterm_count = $this->mAminoSubject->mNtermCount;
@@ -1822,9 +1820,8 @@ class AminoSubjectLogic{
 		$end_index = $special_result['end_index'];
 		if($start_index==-1){
 			$message = '序列存在无法识别字符:'.$subject;
-
 			if(!is_null($aminoResult)){
-				$message = $aminoResult['message'];
+				$message = isset($aminoResult['message']) ? $aminoResult['message'] : $message;
 			}
 			return array(
 			 'has_error'=>true,
@@ -1922,8 +1919,6 @@ class AminoSubjectLogic{
 				$this->getTerms($amino_result['amino_detail']);
 				$rIndex++;
 			}
-			
-			
 		}else{
 			// 有前一个flag
 			if($amino_result['has_error']){
