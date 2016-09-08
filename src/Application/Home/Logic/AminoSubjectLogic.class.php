@@ -2396,10 +2396,10 @@ class AminoSubjectLogic{
 				}
 			}
 		}
-		
 		foreach($cterms as $chain=>$cterm_list){
 			if(count($cterm_list)==0) continue;
-			foreach($cterm_list as $cterm){
+			$cterm_details = $cterm_list['detail'];
+			foreach($cterm_details as $cterm){
 				$term_data = $standard_data[$cterm];
 				$flag = $term_data['flag'];
 				if($flag==4){
@@ -2418,7 +2418,6 @@ class AminoSubjectLogic{
 				}
 			}
 		}
-		
 		foreach($amino_details as $amino_detail){
 			$detail = $amino_detail['detail'];
 			$flag = $amino_detail['detail']['flag'];

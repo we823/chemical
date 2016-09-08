@@ -154,6 +154,7 @@ function remove_str($subject, $default_value='-'){
  * 替换特殊字符
  */
 function replace_special($subject){
+	$subject = trim($subject);
 	$subject = str_replace('－', '-', $subject);
 	$subject = str_replace('（', '(', $subject);
 	$subject = str_replace('）', ')', $subject);
